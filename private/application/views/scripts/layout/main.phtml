@@ -1,0 +1,166 @@
+<?=$this->doctype();?>
+<!--[if lt IE 7]> <html class="no-js lt-ie9 lt-ie8 lt-ie7" lang="pt-br" prefix="og: http://ogp.me/ns#"> <![endif]-->
+<!--[if IE 7]>    <html class="no-js lt-ie9 lt-ie8" lang="pt-br" prefix="og: http://ogp.me/ns#"> <![endif]-->
+<!--[if IE 8]>    <html class="no-js lt-ie9" lang="pt-br" prefix="og: http://ogp.me/ns#"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="pt-br" prefix="og: http://ogp.me/ns#">
+<!--<![endif]-->
+    <head>
+        <?= $this->headTitle();?>
+        <?= $this->headMeta();?>
+        <?= $this->Jquery()->setRenderMode(ZendX_JQuery::RENDER_STYLESHEETS);?>		
+        <?= $this->headLink();?>		
+        <script src="/resources/js/modernizr/modernizr-2.6.2.min.js" type="text/javascript"></script>
+    </head>
+    <body>
+        <div class="navbar navbar-inverse navbar-fixed-top">
+            <div class="navbar-inner">
+                <div class="container-fluid">
+                    <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    
+                    <a class="brand" href="/"><?=  BBBManager_Util_Skinning::getInstance()->get('company_name');?> - Administração BBB</a>
+                    
+                    <ul class="nav pull-right">
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">Logado como <?=IMDT_Util_Auth::getInstance()->get('full_name');?> <b class="caret"></b></a>
+                            <ul class="dropdown-menu">
+                                <li><a href="/ui/users/edit-me"><i class="icon-user"></i> Meus dados</a></li>
+                                <li class="divider"></li>
+                                <li><a href="/login/auth/logout"><i class="icon-off"></i> Sair</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="container-fluid">
+            <div class="row-fluid">
+                <div class="span3">
+                    <div class="accordion" id="accordion2">
+                        <div class="accordion-group">
+                          <div class="accordion-heading">
+                            <a class="accordion-toggle filhos" data-toggle="collapse" data-parent="#accordion2" href="#collapseAcessar">
+                              Acessar<i class="icon-chevron-right pull-right"></i>
+                            </a>
+                          </div>
+                          <div id="collapseAcessar" class="accordion-body collapse">
+                            <div class="accordion-inner">
+                                <ul class="nav nav-list">
+                                    <li <?=(in_array($this->currentUrl, array('/ui/recordings/list')) ? ' class="active"' : '');?>><a href="/ui/recordings/list">Gravações</a></li>
+                                    <li <?=(in_array($this->currentUrl, array('/ui/index/index')) ? ' class="active"' : '');?>><a href="/ui/index">Salas</a></li>
+                                </ul>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="accordion-group">
+                          <div class="accordion-heading">
+                            <a class="accordion-toggle" data-parent="#accordion2" href="/ui/groups">
+                                Grupos
+                            </a>
+                          </div>
+                        </div>
+                        <div class="accordion-group">
+                          <div class="accordion-heading">
+                            <a class="accordion-toggle" data-parent="#accordion2" href="/ui/speed-profiles">
+                                Perfis de Velocidade
+                            </a>
+                          </div>
+                        </div>
+                        <div class="accordion-group">
+                          <div class="accordion-heading">
+                            <a class="accordion-toggle filhos" data-toggle="collapse" data-parent="#accordion2" href="#collapseOne">
+                              Salas<i class="icon-chevron-right pull-right"></i>
+                            </a>
+                          </div>
+                          <div id="collapseOne" class="accordion-body collapse">
+                            <div class="accordion-inner">
+                                <ul class="nav nav-list">
+                                    <li <?=(in_array($this->currentUrl, array('/ui/categories/index')) ? ' class="active"' : '');?>><a href="/ui/categories">Categorias</a></li>
+                                    <li <?=(in_array($this->currentUrl, array('/ui/recordings/index','/ui/recordings/edit')) ? ' class="active"' : '');?>><a href="/ui/recordings/index">Gravações</a></li>
+                                    <li <?=(in_array($this->currentUrl, array('/ui/rooms/index', '/ui/rooms/edit')) ? ' class="active"' : '');?>><a href="/ui/rooms/index">Salas</a></li>
+                                    <li <?=(in_array($this->currentUrl, array('/ui/tags/index')) ? ' class="active"' : '');?>><a href="/ui/tags/index">Tags</a></li>
+                                </ul>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="accordion-group">
+                          <div class="accordion-heading">
+                            <a class="accordion-toggle filhos" data-toggle="collapse" data-parent="#accordion2" href="#collapseAdm">
+                              Sistema<i class="icon-chevron-right pull-right"></i>
+                            </a>
+                          </div>
+                          <div id="collapseAdm" class="accordion-body collapse">
+                            <div class="accordion-inner">
+                                <ul class="nav nav-list">
+                                    <li <?=(in_array($this->currentUrl, array('/ui/invite-templates/index')) ? ' class="active"' : '');?>><a href="/ui/invite-templates/index">Modelo Convite</a></li>
+                                    <li <?=(in_array($this->currentUrl, array('/ui/maintenance/index')) ? ' class="active"' : '');?>><a href="/ui/maintenance/index">Modo de Manutenção</a></li>
+                                    <li <?=(in_array($this->currentUrl, array('/ui/skinning/index')) ? ' class="active"' : '');?>><a href="/ui/skinning/index">Skinning</a></li>
+                                </ul>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="accordion-group">
+                          <div class="accordion-heading">
+                            <a class="accordion-toggle" data-parent="#accordion2" href="/ui/users/index">
+                              Usuários
+                            </a>
+                          </div>
+                        </div>
+                    </div>
+                </div><!--/span-->
+                <div class="span9">
+                    <?=$this->renderMessages();?>
+                    <?=$this->layout()->content;?>
+                </div><!--/span-->
+            </div><!--/row-->
+            <hr>
+            <footer>
+              <p>&copy; <a href="http://www.imdt.com.br">iMDT</a> 2013</p>
+            </footer>
+        </div><!--/.fluid-container-->
+        <?= $this->Jquery()->setRenderMode(ZendX_JQuery::RENDER_LIBRARY|ZendX_JQuery::RENDER_SOURCES|ZendX_JQuery::RENDER_JQUERY_ON_LOAD|ZendX_JQuery::RENDER_JAVASCRIPT);?>
+        <?= $this->headScript();?>
+        
+        <div class="modal hide fade" id="confirm-dialog">
+			<div class="modal-header">
+				<a class="close" data-dismiss="modal">×</a>
+				<h3>Confirm</h3>
+			</div>
+			<div class="modal-body">
+				&nbsp;
+			</div>
+			<div class="modal-footer">
+				<a href="#" class="btn btn-danger">Ok</a>
+				<a href="#" class="btn btn-cancel" data-dismiss="modal">Cancel</a>
+			</div>
+		</div>
+		
+		<div class="modal hide" id="wait-dialog" data-backdrop="static" data-keyboard="false">
+			<div class="modal-header">
+				<h3>Wait</h3>
+			</div>
+			<div class="modal-body">
+				<div class="progress progress-striped active"><div class="bar" style="width: 100%;"></div></div>
+				<div class="text" style="width:100%; text-align:center;">Content is being loaded.</div>
+			</div>
+		</div>
+        
+        <div class="modal hide fade" id="alert-dialog">
+			<div class="modal-header">
+				<a class="close" data-dismiss="modal" style="right:0px;">×</a>
+				<h3>Alert</h3>
+			</div>
+			<div class="modal-body">
+				&nbsp;
+			</div>
+			<div class="modal-footer">
+				<button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+			</div>
+		</div>
+        
+    </body>
+</html>
