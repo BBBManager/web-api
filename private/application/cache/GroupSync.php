@@ -87,21 +87,33 @@ class BBBManager_Cache_GroupSync{
 	}
 	
 	$groupGroupModel = new BBBManager_Model_GroupGroup();
-	
+        $groupGroupCollection = $groupGroupModel->fetchAll();
+        $rGroupGroupCollection = (($groupGroupCollection instanceof Zend_Db_Table_Rowset) ? $groupGroupCollection->toArray() : array());
+        $groupGroupAlreadyInDb = array();
+        
+        foreach($rGroupGroupCollection as $groupGroupItem){
+            $groupGroupAlreadyInDb[$groupGroupItem['group_id'] . '-' . $groupGroupItem['parent_group_id']] = true;
+        }
+
 	foreach($ldapGroupsMemberOfMapping as $groupName => $parentNames){
 	    $childGroupId = $rLdapGroupNameXIdMapping[$groupName];
-	    
 	    $groupGroupModel->deleteLdapGroupHierarchy($childGroupId);
 	    
 	    foreach($parentNames as $parentName){
-		$parentGroupId = $rLdapGroupNameXIdMapping[$parentName];	
-		
+                $parentGroupId = $rLdapGroupNameXIdMapping[$parentName];
+                
+                if(isset($groupGroupAlreadyInDb[$childGroupId.'-'.$parentGroupId])){
+                    continue;
+                }
+                
 		$groupGroupModel->insert(array(
 		    'group_id'		    => $childGroupId,
 		    'auth_mode_id'	    => BBBManager_Config_Defines::$LDAP_AUTH_MODE,
 		    'parent_group_id'	    => $parentGroupId,
 		    'parent_auth_mode_id'   => BBBManager_Config_Defines::$LDAP_AUTH_MODE
 		));
+                
+                $groupGroupAlreadyInDb[$childGroupId.'-'.$parentGroupId] = true;
 	    }
 	}
 	

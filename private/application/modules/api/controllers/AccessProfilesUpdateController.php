@@ -64,13 +64,28 @@ class Api_AccessProfilesUpdateController extends Zend_Rest_Controller {
         $params = $this->_helper->params();
         $pUuid = $params['r'];
         
+        $fullUpdate = true;
+        $rUsers = array();
+        
+        if(file_exists(BBBManager_Util_AccessProfileChanges::getInstance()->getFileName()) && (strlen(file_get_contents(BBBManager_Util_AccessProfileChanges::getInstance()->getFileName())) > 0)){
+            $rUsers = json_decode(file_get_contents(BBBManager_Util_AccessProfileChanges::getInstance()->getFileName()));
+            $fullUpdate = false;
+        }
+        
         $groupsHierarchy = BBBManager_Cache_GroupHierarchy::getInstance()->getData();
         
-        BBBManager_Cache_Auth::getInstance()->clean();
-        $ldapMembers = array();
-        IMDT_Util_Ldap::getInstance()->findMembersRecursively($ldapMembers);
-        
-        $usersCount = count($ldapMembers);
+        if($fullUpdate){
+            BBBManager_Cache_Auth::getInstance()->clean();
+            $ldapMembers = array();
+            try{
+                IMDT_Util_Ldap::getInstance()->findMembersRecursively($ldapMembers);
+                $usersCount = count($ldapMembers);
+            } catch (Exception $ex) {
+                $usersCount = 0;
+            }
+        }else{
+            $usersCount = 0;
+        }
         
         $userModel = new BBBManager_Model_User();
         $groupModel = new BBBManager_Model_Group();
@@ -80,6 +95,10 @@ class Api_AccessProfilesUpdateController extends Zend_Rest_Controller {
         $usersWithGroupsSelect->where('1 = ?', new Zend_Db_Expr($userModel->getSqlStatementForActiveUsers()));
         $usersWithGroupsSelect->join('user_group','user_group.user_id = user.user_id',array('groups' => new Zend_Db_Expr('GROUP_CONCAT(distinct user_group.group_id SEPARATOR ",")')));
         $usersWithGroupsSelect->group(array('user_id', 'login', 'name', 'auth_mode_id'));
+        
+        if($fullUpdate == false){
+            $usersWithGroupsSelect->where('user.user_id in(?)', $rUsers);
+        }
 
         $usersWithGroupsCollection = $userModel->fetchAll($usersWithGroupsSelect);
         $rUsersWithGroups = ($usersWithGroupsCollection instanceof Zend_Db_Table_Rowset ? $usersWithGroupsCollection->toArray() : array());

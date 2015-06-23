@@ -13,10 +13,11 @@ class Api_AccessLogsController extends Zend_Rest_Controller {
         
     	$this->model = new BBBManager_Model_AccessLog();
         
+        $this->filters['main_create_date'] = array('column'=>'access_log.create_date','type'=>'datetime');
         $this->filters['create_date'] = array('column'=>'access_log.create_date','type'=>'datetime');
         $this->filters['ip_address'] = array('column'=>'access_log.ip_address','type'=>'ip_address');
         $this->filters['description'] = array('column'=>'access_log_description.description','type'=>'text');
-        $this->filters['detail'] = array('column'=>'access_log.detail','type'=>'text');
+        $this->filters['detail'] = array('column'=>'CONCAT(coalesce(detail,\'\'),coalesce(old,\'\'),coalesce(new,\'\'))','type'=>'text');
         $this->filters['description_hash'] = array('column'=>array('access_log.controller','access_log.action'),'type'=>'hash');
         $this->filters['user'] = array('column'=>'access_log.user_id','type'=>'integer');
         $this->filters['user_auth_mode'] = array('column'=>'user.auth_mode_id','type'=>'integer');

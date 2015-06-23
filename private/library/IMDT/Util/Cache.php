@@ -39,4 +39,9 @@ class IMDT_Util_Cache{
 	$zendCache = self::initCache($cacheDataInstance);
 	$zendCache->save(null, $cacheDataInstance->getCacheStorageKey());
     }
+
+    public static function setInCache($cacheDataInstance, $value){
+        $zendCache = self::initCache($cacheDataInstance);
+        $zendCache->save($value, $cacheDataInstance->getCacheStorageKey());
+    }
 }

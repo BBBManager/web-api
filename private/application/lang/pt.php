@@ -9,7 +9,7 @@ return array(
     'Page not found' => 'Página não encontrada',
     'Invalid Credentials' => 'Credenciais inválidas',
     'Access denied for your user.' => 'Acesso não habilitado para o seu usuário.',
-    'Your user is blocked: validity period has expired.' => 'O seu usuário está bloqueado: Prazo de vigência expirou.',
+    'Your user is blocked: validity period has expired.' => 'Usuário fora do período de vigência.',
     'Name' => 'Nome',
     'Start time' => 'Hora de início',
     'End time' => 'Hora de fim',
@@ -164,7 +164,6 @@ return array(
     'column-meeting_room-blocking_options' => 'Opções de bloqueio',
     'column-meeting_room-meeting_mute_on_start' => 'Microfone iniciará como mudo',
     'column-meeting_room-meeting_lock_on_start' => 'Usuários entrarão bloqueados',
-    'column-meeting_room-lock_allow_moderator_locking' => 'Administradores, moderadores e palestrantes poderão ser bloqueados?',
     'column-meeting_room-lock_disable_mic_for_locked_users' => 'O bloqueio padrão afeta o microfone',
     'column-meeting_room-lock_disable_cam_for_locked_users' => 'O bloqueio padrão afeta o compartilhamento de câmera',
     'column-meeting_room-lock_disable_public_chat_for_locked_users' => 'O bloqueio padrão afeta o chat público',
@@ -287,6 +286,7 @@ return array(
     'column-record_tag-name' => 'Nome da tag',
     'column-record_tag-create_date' => 'Data de criação',
     'column-record_tag-last_update' => 'Data da última modificação',
+    'column-record_tag-start_time' => 'Posição',
 
     'table-access_profile' => 'Perfil de Acesso',
     'column-access_profile-id' => 'Id',
@@ -540,5 +540,12 @@ return array(
     "No record matching '%value%' was found" => "Nenhum registro correspondente com '%value%' foi encontrado",
     "A record matching '%value%' was found" => "Um registro correspondente com '%value%' foi encontrado",
     'Invalid CSV file, record in line %s already exists.' => 'Arquivo CSV inválido, o registro na linha %s já existe.',
-    'File processed successfully.' => 'Arquivo processado com sucesso.'    
+    'File processed successfully.' => 'Arquivo processado com sucesso.',
+    'Started Rooms' => 'Salas Iniciadas',
+    'Waiting Rooms' => 'Salas por Iniciar',
+    'Ended Rooms' => 'Salas Encerradas',
+    'This invitation will be sent to %s recipients, do you want to continue?' => 'Esse convite será enviado para %s destinatários, deseja continuar?',
+    'Maintenance mode activated' => 'Modo de manutenção ativado',
+    'This is an automatic message, informing you that the maintenance mode was activated, use the link below to access the system during the maintenance period' => 'Essa é uma mensagem automático, informando que o modo de manutenção foi ativado., use o link abaixo para acessar o sistema durante o período de manutenção',
+    'E-mail sent at ' => 'E-mail enviado às'
 );

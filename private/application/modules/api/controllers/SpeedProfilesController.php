@@ -19,6 +19,7 @@ class Api_SpeedProfilesController extends Zend_Rest_Controller {
     	$this->columnValidators['max_download'] = array(new Zend_Validate_NotEmpty(), new Zend_Validate_Int());
     	$this->columnValidators['max_upload'] = array(new Zend_Validate_NotEmpty(), new Zend_Validate_Int());
     
+    	$this->filters['main_name'] = array('column' => 'name', 'type' => 'text');
     	$this->filters['name'] = array('column' => 'name', 'type' => 'text');
     	$this->filters['network'] = array('column' => 'network', 'type' => 'ip_address');
     	$this->filters['max_download'] = array('column' => 'max_download', 'type' => 'integer');

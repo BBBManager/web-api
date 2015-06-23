@@ -68,11 +68,11 @@ class Api_BbbConfigsController extends Zend_Rest_Controller {
             //debug($bbbIniConfig->get('meetingLockOnStart'));
             $rCollection['meetingMuteOnStart'] = $bbbIniConfig->get('meetingMuteOnStart') ?: '0'; //if not exists, false! 
             $rCollection['meetingLockOnStart'] = $bbbIniConfig->get('meetingLockOnStart') ?: '0'; //if not exists, false! 
-            $rCollection['lockAllowModeratorLocking'] = $bbbIniConfig->get('lockAllowModeratorLocking') ?: '0'; //if not exists, false! 
             $rCollection['lockDisableMicForLockedUsers'] = $bbbIniConfig->get('lockDisableMicForLockedUsers') ?: '0'; //if not exists, false! 
             $rCollection['lockDisableCamForLockedUsers'] = $bbbIniConfig->get('lockDisableCamForLockedUsers') ?: '0'; //if not exists, false! 
             $rCollection['lockDisablePublicChatForLockedUsers'] = $bbbIniConfig->get('lockDisablePublicChatForLockedUsers') ?: '0'; //if not exists, false! 
             $rCollection['lockDisablePrivateChatForLockedUsers'] = $bbbIniConfig->get('lockDisablePrivateChatForLockedUsers') ?: '0'; //if not exists, false! 
+            $rCollection['lockLayoutForLockedUsers'] = $bbbIniConfig->get('lockLayoutForLockedUsers') ?: '0'; //if not exists, false! 
             
             //$timezones = $bbbIniConfig->toArray();
             //$arrTimezones = $timezones['timezones'];

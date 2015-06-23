@@ -39,6 +39,7 @@ class Api_UsersController extends Zend_Rest_Controller {
         
     	$this->filters['user_id'] = array('column' => 'user.user_id', 'type' => 'integer');
     	$this->filters['name'] = array('column' => 'user.name', 'type' => 'text');
+    	$this->filters['main_name'] = array('column' => 'user.name', 'type' => 'text');
     	$this->filters['login'] = array('column' => 'user.login', 'type' => 'text');
     	$this->filters['email'] = array('column' => 'user.email', 'type' => 'text');
     	$this->filters['auth_mode_id'] = array('column' => 'user.auth_mode_id', 'type' => 'integer');
@@ -224,27 +225,27 @@ class Api_UsersController extends Zend_Rest_Controller {
 	    $this->view->response = array('success' => '0', 'msg' => $e->getMessage());
 	}
     }
-
+    
     public function parseValidators($data) {
-	$arrErrorMessages = array();
-
-	foreach ($this->columnValidators as $column => $validators) {
-	    foreach ($validators as $currValidator) {
-    		$value = (isset($data[$column]) && strlen($data[$column]) > 0) ? $data[$column] : '';
-            if($value == null && (!$currValidator instanceof Zend_Validate_NotEmpty)) continue;
-            
-    		if (!$currValidator->isValid($value)) {
-    		    foreach ($currValidator->getMessages() as $errorMessage) {
-    			 $arrErrorMessages[] = $this->_helper->translate('column-user-' . $column) . ': ' . $errorMessage;
-    		    }
-                break;
-    		}
-	    }
-	}
-
-	return $arrErrorMessages;
+    	$arrErrorMessages = array();
+    
+    	foreach ($this->columnValidators as $column => $validators) {
+    	    foreach ($validators as $currValidator) {
+        		$value = (isset($data[$column]) && strlen($data[$column]) > 0) ? $data[$column] : '';
+                if($value == null && (!$currValidator instanceof Zend_Validate_NotEmpty)) continue;
+                
+        		if (!$currValidator->isValid($value)) {
+        		    foreach ($currValidator->getMessages() as $errorMessage) {
+        			 $arrErrorMessages[] = $this->_helper->translate('column-user-' . $column) . ': ' . $errorMessage;
+        		    }
+                    break;
+        		}
+    	    }
+    	}
+    
+    	return $arrErrorMessages;
     }
-
+    
     public function doConversions(&$row) {
     	$data = $this->_helper->params();
     
@@ -409,6 +410,11 @@ class Api_UsersController extends Zend_Rest_Controller {
         
 	    $this->doConversions($rowModel);
             
+            if($rowModel->auth_mode_id != BBBManager_Config_Defines::$LOCAL_AUTH_MODE){
+                unset($rowModel->valid_to);
+                unset($rowModel->valid_from);
+            }
+                
 	    $rowModel->save();
             
             $currentGroupsSelect = $this->model->select()->setIntegrityCheck(false)->from('user_group')->where('user_id = ?', $this->_id);

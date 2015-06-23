@@ -15,6 +15,7 @@ class Api_GroupsController extends Zend_Rest_Controller{
         $this->columnValidators = array();
         $this->columnValidators['name'] = array(new Zend_Validate_NotEmpty());
         
+        $this->filters['main_name'] = array('column'=>'g.name','type'=>'text');
         $this->filters['name'] = array('column'=>'g.name','type'=>'text');
         $this->filters['auth_mode_id'] = array('column'=>'g.auth_mode_id','type'=>'integer');
         $this->filters['access_profile_id'] = array('column'=>'g.access_profile_id','type'=>'integer');
@@ -367,7 +368,27 @@ class Api_GroupsController extends Zend_Rest_Controller{
         }
     }
 
-
-    
-    
+    public function importAction(){
+	$hasTransaction = false;
+	try{
+	    $inputData = $this->_helper->params();
+	    $csvFileContents = (isset($inputData['file-contents']) ? $inputData['file-contents'] : null);
+	    
+	    if($csvFileContents == null){
+		throw new Exception($this->_helper->translate('Invalid CSV file content'));
+	    }
+	    
+	    $this->model->getAdapter()->beginTransaction();
+	    $hasTransaction = true;
+	    $records = $this->model->importCsv($csvFileContents);
+	    $this->model->getAdapter()->commit();
+	    
+	    $this->view->response = array('success' => '1', 'msg' => sprintf($this->_helper->translate('%s records imported'), $records) . '.');
+	}catch(Exception $e){
+	    if($hasTransaction == true){
+		$this->model->getAdapter()->rollback();
+	    }
+	    $this->view->response = array('success' => '0', 'msg' => $e->getMessage());
+	}
+    }
 }

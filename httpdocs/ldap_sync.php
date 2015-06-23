@@ -12,18 +12,6 @@ try {
     $application = new Zend_Application(APPLICATION_ENV, APPLICATION_PATH . '/configs/application.ini');
     $application->bootstrap();
     
-    $adapter = Zend_Db::factory(
-        'PDO_MYSQL', 
-        array(
-            'host'      => '10.30.10.10',
-            'port'      => '33306',
-            'dbname'    => 'bbb',
-            'username'  => 'bbb',
-            'password'  => 'bbb'
-        )
-    );
-    Zend_Db_Table_Abstract::setDefaultAdapter($adapter);
-    
     // Invalidate the auth.ini cache
     BBBManager_Cache_Auth::getInstance()->clean();
     

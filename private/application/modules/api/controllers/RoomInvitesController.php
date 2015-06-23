@@ -121,12 +121,18 @@ class Api_RoomInvitesController extends Zend_Rest_Controller {
 	    }
 
 	    $meetingRoomId = $data['meeting_room_id'];
-
+            $arrTo = BBBManager_Util_MeetingRoom::getAllUsersEmail($meetingRoomId);
+            
+            if(count($arrTo) > IMDT_Util_Config::getInstance()->get('bbbmanager_send_invites_max_rcpt')){
+                if((! isset($data['max_rcpt_confirmed'])) || ($data['max_rcpt_confirmed'] == '')){
+                    $this->view->response = array('success' => '1', 'msg' => sprintf(IMDT_Util_Translate::_('This invitation will be sent to %s recipients, do you want to continue?'),count($arrTo)), 'data' => array('toCount' => count($arrTo)));
+                    return;
+                }
+            }
+            
 	    $rowModel = $this->model->find($meetingRoomId)->current();
 	    if ($rowModel == null)
 		throw new Exception(sprintf($this->_helper->translate('Meeting room %s not found.'), $meetingRoomId));
-
-
 
 	    $url = '<a href="' . IMDT_Util_Config::getInstance()->get('web_base_url') . $rowModel->url . '">' . IMDT_Util_Config::getInstance()->get('web_base_url') . $rowModel->url . '</a>';
 
@@ -152,21 +158,39 @@ class Api_RoomInvitesController extends Zend_Rest_Controller {
 	    }
 
 	    $presenters = implode(', ', $presenters);
+            
+            $body = $data['body'];
+            $subject = $data['subject'];
+            
+            $tags = array(
+                '__ROOM_START__'        => IMDT_Util_Date::filterDatetimeToCurrentLang($rowModel->date_start, false),
+                '__ROOM_END__'          => IMDT_Util_Date::filterDatetimeToCurrentLang($rowModel->date_end, false),
+                '__ROOM_NAME__'         => $rowModel->name,
+                '__ROOM_URL__'          => $url,
+                '__ROOM_PRESENTER__'    => $presenters
+            );
+            
+            /*foreach($tags as $tag => $value){
+                $body = str_replace($this->_helper->translate($tag), $tag, $body);
+                $subject = str_replace($this->_helper->translate($tag), $tag, $subject);
+            }*/
+            
+            foreach($tags as $tag => $value){
+                $body = str_replace($tag, $value, $body);
+                $subject = str_replace($tag, $value, $subject);
+            }
 
-	    $body = $data['body'];
-	    $body = str_replace($this->_helper->translate('__ROOM_START__'), IMDT_Util_Date::filterDatetimeToCurrentLang($rowModel->date_start, false), $body);
-	    $body = str_replace($this->_helper->translate('__ROOM_END__'), IMDT_Util_Date::filterDatetimeToCurrentLang($rowModel->date_end, false), $body);
-	    $body = str_replace($this->_helper->translate('__ROOM_NAME__'), $rowModel->name, $body);
-	    $body = str_replace($this->_helper->translate('__ROOM_URL__'), $url, $body);
-	    $body = str_replace($this->_helper->translate('__ROOM_PRESENTER__'), $presenters, $body);
+	    /*$body = str_replace('__ROOM_START__', IMDT_Util_Date::filterDatetimeToCurrentLang($rowModel->date_start, false), $body);
+	    $body = str_replace('__ROOM_END__', IMDT_Util_Date::filterDatetimeToCurrentLang($rowModel->date_end, false), $body);
+	    $body = str_replace('__ROOM_NAME__', $rowModel->name, $body);
+	    $body = str_replace('__ROOM_URL__', $url, $body);
+	    $body = str_replace('__ROOM_PRESENTER__', $presenters, $body);
 
-	    $subject = $data['subject'];
-	    $subject = str_replace($this->_helper->translate('__ROOM_START__'), IMDT_Util_Date::filterDatetimeToCurrentLang($rowModel->date_start, false), $subject);
-	    $subject = str_replace($this->_helper->translate('__ROOM_END__'), IMDT_Util_Date::filterDatetimeToCurrentLang($rowModel->date_end, false), $subject);
-	    $subject = str_replace($this->_helper->translate('__ROOM_NAME__'), $rowModel->name, $subject);
-	    $subject = str_replace($this->_helper->translate('__ROOM_URL__'), $url, $subject);
-	    $subject = str_replace($this->_helper->translate('__ROOM_PRESENTER__'), $presenters, $subject);
-
+	    $subject = str_replace('__ROOM_START__', IMDT_Util_Date::filterDatetimeToCurrentLang($rowModel->date_start, false), $subject);
+	    $subject = str_replace('__ROOM_END__', IMDT_Util_Date::filterDatetimeToCurrentLang($rowModel->date_end, false), $subject);
+	    $subject = str_replace('__ROOM_NAME__', $rowModel->name, $subject);
+	    $subject = str_replace('__ROOM_URL__', $url, $subject);
+	    $subject = str_replace('__ROOM_PRESENTER__', $presenters, $subject);*/
 
 	    $mail = new Zend_Mail('utf-8');
 	    $mail->setBodyHtml($body);
@@ -180,7 +204,6 @@ class Api_RoomInvitesController extends Zend_Rest_Controller {
 	    
 	    $mail->addTo($defaultFrom['email'], $defaultFrom['name']);
 	    
-            $arrTo = BBBManager_Util_MeetingRoom::getAllUsersEmail($meetingRoomId);
 	    foreach($arrTo as $email) {
 	        $mail->addBcc($email);
 	    }

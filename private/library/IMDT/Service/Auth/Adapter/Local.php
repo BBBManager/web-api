@@ -4,7 +4,7 @@ class IMDT_Service_Auth_Adapter_Local {
 
     private $_settings;
 
-    public function authenticate($username, $password) {
+    public function authenticate($username, $password, $moodle = false) {
 	if ($this->_settings == null) {
 	    $this->_settings = IMDT_Service_Auth::getInstance()->getSettings();
 	}
@@ -32,6 +32,8 @@ class IMDT_Service_Auth_Adapter_Local {
                     '*',
                     'authok' => new Zend_Db_Expr(
                         'CASE
+                            WHEN 1 = ' . ($moodle == true ? '1':'0') . '
+                                THEN 1
                             WHEN ' . $dbAdapter->quoteInto('password = ?', IMDT_Util_Hash::generate($password)) . '
                                 THEN 1
                             ELSE

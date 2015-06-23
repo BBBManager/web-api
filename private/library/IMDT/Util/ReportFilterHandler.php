@@ -279,7 +279,7 @@ class IMDT_Util_ReportFilterHandler {
                     } elseif($condition == 'b') {
                         $strDate2 = IMDT_Util_Date::filterDateToApi($until);
                         if(strlen($strDate2) > 0) {
-                            $arrWhereGroups[] = $db->quoteInto($curr['column'].' between TIMESTAMP(?) and TIMESTAMP(?)',$strDate.' 00:00:00', $strDate2.' 23:59:59');
+                            $arrWhereGroups[] = $db->quoteInto($curr['column'].' between TIMESTAMP(\''.$strDate.' 00:00:00'.'\') and TIMESTAMP(\''.$strDate2.' 23:59:59'.'\')',null);
                         } else {
                             $arrWhereGroups[] = $db->quoteInto(''.$curr['column'].' >= TIMESTAMP(?)',$strDate.' 00:00:00');
                         }
@@ -304,7 +304,7 @@ class IMDT_Util_ReportFilterHandler {
                     } elseif($condition == 'b') {
                         $strDatetime2 = IMDT_Util_Date::filterDatetimeToApi($until);
                         if(strlen($strDatetime2) > 0) {
-                            $arrWhereGroups[] = $db->quoteInto($curr['column'].' between TIMESTAMP(?) and TIMESTAMP(?)',$strDatetime, $strDatetime2);
+                            $arrWhereGroups[] = $db->quoteInto($curr['column'].' between TIMESTAMP(\''.$strDatetime.'\') and DATE_ADD(TIMESTAMP(\''.$strDatetime2.'\'), INTERVAL 59 SECOND)',null);
                         } else {
                             $arrWhereGroups[] = $db->quoteInto($curr['column'].' >= TIMESTAMP(?)',$strDatetime);
                         }

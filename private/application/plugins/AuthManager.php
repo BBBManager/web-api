@@ -30,6 +30,8 @@ class BBBManager_Plugin_AuthManager extends Zend_Controller_Plugin_Abstract {
 	$requestingPublicResource = $requestingPublicResource || ($request->getModuleName() == 'api' && $request->getControllerName() == 'security');
 	$requestingPublicResource = $requestingPublicResource || ($request->getModuleName() == 'callback');
         $requestingPublicResource = $requestingPublicResource || ($request->getModuleName() == 'api' && $request->getControllerName() == 'access-profiles-update' && $request->getActionName() == 'put');
+	$requestingPublicResource = $requestingPublicResource || ($request->getModuleName() == 'api' && $request->getControllerName() == 'auto-join');
+        $requestingPublicResource = $requestingPublicResource || ($request->getModuleName() == 'api' && $request->getControllerName() == 'maintenance' && $request->getActionName() == 'get');
 
 	if ($requestingPublicResource == true) {
 	    return;

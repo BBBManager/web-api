@@ -20,6 +20,7 @@ class Api_InviteTemplatesController extends Zend_Rest_Controller {
     
     	$this->filters['subject'] = array('column' => 'subject', 'type' => 'text');
     	$this->filters['name'] = array('column' => 'name', 'type' => 'text');
+    	$this->filters['main_name'] = array('column' => 'name', 'type' => 'text');
     	$this->filters['create_date'] = array('column' => 'create_date', 'type' => 'datetime');
         
         $this->acessLog();

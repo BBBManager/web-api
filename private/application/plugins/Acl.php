@@ -15,6 +15,9 @@ class BBBManager_Plugin_Acl extends Zend_Controller_Plugin_Abstract {
 	$requestingPublicResource = $requestingPublicResource || ($request->getModuleName() == 'api' && $request->getControllerName() == 'access-profiles-update' && $request->getActionName() == 'put');
 	$requestingPublicResource = $requestingPublicResource || ($request->getModuleName() == 'api' && $request->getControllerName() == 'access-profiles-update' && $request->getActionName() == 'post');
 	$requestingPublicResource = $requestingPublicResource || ($request->getModuleName() == 'api' && $request->getControllerName() == 'access-profiles-update' && $request->getActionName() == 'get');
+	$requestingPublicResource = $requestingPublicResource || ($request->getModuleName() == 'api' && $request->getControllerName() == 'moodle');
+	$requestingPublicResource = $requestingPublicResource || ($request->getModuleName() == 'api' && $request->getControllerName() == 'auto-join');
+        $requestingPublicResource = $requestingPublicResource || ($request->getModuleName() == 'api' && $request->getControllerName() == 'maintenance' && $request->getActionName() == 'get');
 	
 	if ($requestingPublicResource == true) {
 	    return;

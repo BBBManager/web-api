@@ -57,6 +57,10 @@ class IMDT_Util_AccessProfile {
         
         $userAccessProfile = BBBManager_Config_Defines::$SYSTEM_USER_PROFILE;
         
+        if(count($userAccessProfiles) == 0){
+            $userAccessProfiles = array(isset($userData['access_profile_id']) ? $userData['access_profile_id'] : BBBManager_Config_Defines::$SYSTEM_USER_PROFILE);
+        }
+        
         foreach($userAccessProfiles as $accessProfileId){
             if($accessProfileId < $userAccessProfile){
                 $userAccessProfile = $accessProfileId;

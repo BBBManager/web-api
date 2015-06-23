@@ -110,8 +110,10 @@ class IMDT_Controller_Helper_ContextSwitch extends Zend_Controller_Action_Helper
 		    mkdir($strTargetPath, 0777, TRUE);
 	    }
 
-	    if (!touch($strTargetPath))
-		die('sem permissao');
+	    if (!touch($strTargetPath)){
+                throw new Exception($strTargetPath . ' not writable');
+            }
+		
 	    
 	    $fileName = $controllerName . '.' . $outputFormat;
 	    $view = Zend_Controller_Action_HelperBroker::getStaticHelper('viewRenderer')->view;
@@ -225,9 +227,9 @@ class IMDT_Controller_Helper_ContextSwitch extends Zend_Controller_Action_Helper
 		    $htmlHeaders .= '</tr>';
 		}
                 
+                $html = $htmlPrepend . $htmlHeaders;
+                
 		if(is_array($view->response['collection']) && (count($view->response['collection']) > 0)){
-                    $html = $htmlPrepend . $htmlHeaders;
-                    
 		    foreach($view->response['collection'] as $iRow => $collectionRow){
                         if((($iRow > 0) && (($iRow % 32) == 0))){
                             $html .= $htmlAppend;
@@ -287,6 +289,11 @@ class IMDT_Controller_Helper_ContextSwitch extends Zend_Controller_Action_Helper
 	$view = Zend_Controller_Action_HelperBroker::getStaticHelper('viewRenderer')->view;
 
 	$arrNewCollection = array();
+        
+        if(!isset($view->response['collection'])){
+            return;
+        }
+        
 	foreach ($view->response['collection'] as $row) {
 	    $arrNewRow = array();
 

@@ -38,9 +38,14 @@ class BBBManager_Util_MeetingRoom {
 		if($member['group_auth_mode_id'] == BBBManager_Config_Defines::$LDAP_AUTH_MODE){
 		    $groupHierarchy = BBBManager_Cache_GroupHierarchy::getInstance()->getData();
 		    $ldapGroupHierarchy = ( isset($groupHierarchy[$member['group_id']]) ? $groupHierarchy[$member['group_id']]['parents'] : array());
-		    
+                    
 		    if(count($ldapGroupHierarchy) > 0){
 			foreach($ldapGroupHierarchy as $parent){
+                            
+                            if($parent['auth_mode_id'] != BBBManager_Config_Defines::$LDAP_AUTH_MODE){
+                                continue;
+                            }
+                            
 			    $usersFromLdapGroup = IMDT_Util_Ldap::getInstance()->fetchUsersFromGroup($parent['name']);
 
 			    foreach($usersFromLdapGroup as $groupMember){

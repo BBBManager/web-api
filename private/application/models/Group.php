@@ -195,7 +195,7 @@ class BBBManager_Model_Group extends Zend_Db_Table_Abstract {
     }
     
     private function buildGroupHierarchyRecursively($parentId, $mapping, &$currentParents) {
-	$currentParents[] = array('group_id' => $parentId, 'name' => self::$_allGroups[$parentId]['name'], 'access_profile_id' => self::$_allGroups[$parentId]['access_profile_id']);
+	$currentParents[] = array('group_id' => $parentId, 'name' => self::$_allGroups[$parentId]['name'], 'access_profile_id' => self::$_allGroups[$parentId]['access_profile_id'], 'auth_mode_id' => self::$_allGroups[$parentId]['auth_mode_id']);
 	
 	if(isset(self::$_groupInfiniteLoopControl[$parentId])){
             return;
@@ -222,5 +222,61 @@ class BBBManager_Model_Group extends Zend_Db_Table_Abstract {
 	
 	return $this->delete($where);
     }
-
+    
+    public function importCsv($fileContents){
+        $csvRecords = IMDT_Util_Csv::import($fileContents);
+	$cols = $this->info('cols');
+        $pk = (is_array($this->_primary) ? current($this->_primary) : $this->_primary);
+        
+	$validRecords = array();
+	
+	foreach($csvRecords as $record){
+	    $validRecord = array();
+	    foreach($record as $column => $value){
+                /*if($column == $pk){
+                    continue;
+                }*/
+                
+                if(in_array($column, array($pk, 'auth_mode_id', 'access_profile_id')) !== false){
+                    continue;
+                }
+                
+		if(array_search($column, $cols) !== false){
+                    if($value == ''){
+                        $value = NULL;
+                    }elseif($column == 'name'){
+                        if(mb_detect_encoding($value) == 'UTF-8'){
+                            $value = utf8_decode($value);
+                        }
+                        $validRecord[$column] = IMDT_Util_String::camelize($value);
+                    }else{
+                        $validRecord[$column] = $value;    
+                    }
+		}
+	    }
+            
+            $validRecord['auth_mode_id'] = BBBManager_Config_Defines::$LOCAL_AUTH_MODE;
+            $validRecord['access_profile_id'] = BBBManager_Config_Defines::$SYSTEM_USER_PROFILE;
+            
+	    $validRecords[] = $validRecord;
+	}
+	
+	$recordCount = 0;
+	
+	foreach($validRecords as $iRecord => $record){
+            $existsSelect = $this->select();
+            $existsSelect->where('name = ?', $record['name']);
+            
+            $exists = $this->fetchRow($existsSelect);
+            
+            if($exists != null){
+                throw new Exception(sprintf(IMDT_Util_Translate::_('Invalid CSV file, record in line %s already exists.'), ($iRecord + 1)));
+            }
+            
+            $this->insert($record);
+	    $recordCount++;
+	}
+	
+	return $recordCount;
+    }
 }

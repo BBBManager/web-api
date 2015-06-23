@@ -32,24 +32,23 @@ class Api_RoomsController extends Zend_Rest_Controller{
                                             'record',
                                             'meeting_mute_on_start',
                                             'meeting_lock_on_start',
-                                            'lock_allow_moderator_locking',
                                             'lock_disable_mic_for_locked_users',
                                             'lock_disable_cam_for_locked_users',
                                             'lock_disable_public_chat_for_locked_users',
                                             'lock_disable_private_chat_for_locked_users',
+                                            'lock_layout_for_locked_users',
                                             'user_id',
                                             'create_date',
                                             'last_update',
-                                            'status' => new Zend_Db_Expr('
-                                                CASE 
-                                                    WHEN date_start > now()
-                                                        THEN ' . BBBManager_Config_Defines::$ROOM_WAITING . '
-                                                    WHEN date_start < now() and date_end > now()
-                                                        THEN ' . BBBManager_Config_Defines::$ROOM_OPENED . '
-                                                    ELSE
-                                                        ' . BBBManager_Config_Defines::$ROOM_CLOSED . '
-                                                END
-            ')))
+                                            'status' => $this->model->getSqlForStatus(),
+                                            'recordings_count' => $this->model->getSqlForRecordingsCount('mr'),
+                                            'meeting_room_category_id'))
+                                    ->joinLeft(array('mrc'=>'meeting_room_category'), 'mrc.meeting_room_category_id = mr.meeting_room_category_id', 
+                                                                    array(
+                                                                           'meeting_room_category_name' => 'mrc.name'
+                                                                        )
+                                                                           
+                                                                                            )
                                     ->joinLeft(array('mrg'=>'meeting_room_group'), 'mrg.meeting_room_id = mr.meeting_room_id', 
                                                                     array(
                                                                            'group_admin_local' => new Zend_Db_Expr("GROUP_CONCAT(distinct case when mrg.meeting_room_profile_id = 1 and mrg.auth_mode_id = 1 then mrg.group_id else null end SEPARATOR ',')"),
@@ -72,12 +71,38 @@ class Api_RoomsController extends Zend_Rest_Controller{
                                                                             'user_attendee_local' => new Zend_Db_Expr("GROUP_CONCAT(distinct case when mru.meeting_room_profile_id = 4 and mru.auth_mode_id = 1 then mru.user_id else null end SEPARATOR ',')"),
                                                                             'user_attendee_ldap' => new Zend_Db_Expr("GROUP_CONCAT(distinct case when mru.meeting_room_profile_id = 4 and mru.auth_mode_id = 2 then mru.user_id else null end SEPARATOR ',')")
                                                                     ))
+                                    ->joinLeft(
+                                            array(
+                                                'recordings' => new Zend_Db_Expr(
+                                                        '( 
+                                                            select
+                                                                meeting_room.meeting_room_id,
+                                                                count(record.record_id) > 0 as has_recordings
+                                                            from
+                                                                meeting_room
+                                                            left outer join 
+                                                                record
+                                                                    on record.meeting_room_id = meeting_room.meeting_room_id
+                                                            group by meeting_room.meeting_room_id
+                                                        )'
+                                                )
+                                            ),
+                                            'recordings.meeting_room_id = mr.meeting_room_id',
+                                            array(
+                                                'has_recordings'
+                                            )
+
+                                    )
+                
                                     ->group(array('mr.meeting_room_id', 'mr.name', 'mr.date_start', 'mr.date_end', 'mr.timezone', 'mr.encrypted', 'mr.privacy_policy', 'mr.url', 'mr.participants_limit', 'mr.record', 'mr.user_id', 'mr.create_date', 'mr.last_update'));
         
         
         
         
         $this->columnValidators = array();
+        $this->columnValidators['main_date_start'] = array(new Zend_Validate_NotEmpty(), 
+                                                    new Zend_Validate_Date(array('format' => 'yyyy-MM-dd HH:mm:ss')));
+                                                    
         $this->columnValidators['date_start'] = array(new Zend_Validate_NotEmpty(), 
                                                     new Zend_Validate_Date(array('format' => 'yyyy-MM-dd HH:mm:ss')));
                                                     
@@ -91,7 +116,6 @@ class Api_RoomsController extends Zend_Rest_Controller{
         /*
         $this->columnValidators['meeting_mute_on_start'] = array(new Zend_Validate_Int());
         $this->columnValidators['meeting_lock_on_start'] = array(new Zend_Validate_Int());
-        $this->columnValidators['lock_allow_moderator_locking'] = array(new Zend_Validate_Int());
         $this->columnValidators['lock_disable_mic_for_locked_users'] = array(new Zend_Validate_Int());
         $this->columnValidators['lock_disable_cam_for_locked_users'] = array(new Zend_Validate_Int());
         $this->columnValidators['lock_disable_public_chat_for_locked_users'] = array(new Zend_Validate_Int());
@@ -119,17 +143,17 @@ class Api_RoomsController extends Zend_Rest_Controller{
         $this->filters['privacy_policy'] = array('column'=>'privacy_policy','type'=>'integer');
         $this->filters['url'] = array('column'=>'url','type'=>'text');
         $this->filters['participants_limit'] = array('column'=>'participants_limit','type'=>'integer');
+        $this->filters['recordings_count'] = array('column'=>'recordings_count','type'=>'integer');
+        $this->filters['has_recordings'] = array('column'=>'has_recordings','type'=>'boolean');
+        $this->filters['meeting_room_category_id'] = array('column'=>'meeting_room_category_id','type'=>'integer');
         
         $this->filters['encrypted'] = array('column'=>'encrypted','type'=>'boolean');
         $this->filters['record'] = array('column'=>'record','type'=>'boolean');
         $this->filters['meeting_mute_on_start'] = array('column'=>'meeting_mute_on_start','type'=>'boolean');
         $this->filters['meeting_lock_on_start'] = array('column'=>'meeting_lock_on_start','type'=>'boolean');
-        $this->filters['lock_allow_moderator_locking'] = array('column'=>'lock_allow_moderator_locking','type'=>'boolean');
-        $this->filters['lock_disable_mic_for_locked_users'] = array('column'=>'lock_disable_mic_for_locked_users','type'=>'boolean');
         $this->filters['lock_disable_cam_for_locked_users'] = array('column'=>'lock_disable_cam_for_locked_users','type'=>'boolean');
         $this->filters['lock_disable_public_chat_for_locked_users'] = array('column'=>'lock_disable_public_chat_for_locked_users','type'=>'boolean');
         $this->filters['lock_disable_private_chat_for_locked_users'] = array('column'=>'lock_disable_private_chat_for_locked_users','type'=>'boolean');
-        
         
         $select = 'select 1 from meeting_room_group join `group` using(group_id) where meeting_room_group.meeting_room_id = mr.meeting_room_id and meeting_room_group.meeting_room_profile_id = 1';
         $this->filters['group_admin'] = array('column'=>'meeting_room_group.group_id','type'=>'exists','select'=>$select);
@@ -307,6 +331,9 @@ class Api_RoomsController extends Zend_Rest_Controller{
             
             IMDT_Util_ReportFilterHandler::parseThisFilters($this->select,$this->filters);
             IMDT_Util_ReportFilterHandler::parseThisQueries($this->select,$this->filters);
+            
+            //echo $this->select;die;
+            
             //file_put_contents('log_sql.txt', $this->select);
             $collection = $this->model->fetchAll($this->select);
             $rCollection = ($collection != null ? $collection->toArray() : array());
@@ -388,7 +415,7 @@ class Api_RoomsController extends Zend_Rest_Controller{
         
         foreach($this->columnValidators as $column=>$validators) {
             foreach($validators as $currValidator) {
-                $value = $data[$column] ?: '';
+                $value = (isset($data[$column]) ? $data[$column] : '');
                 if(!$currValidator->isValid($value)) {
                     foreach($currValidator->getMessages() as $errorMessage) {
                         $arrErrorMessages[] = $this->_helper->translate('column-meeting_room-'.$column).': '.$errorMessage;
@@ -414,10 +441,12 @@ class Api_RoomsController extends Zend_Rest_Controller{
     }
     
     public function postAction() {
+        unset($this->columnValidators['main_date_start']);
         $this->model->getAdapter()->beginTransaction();
         
         try {
             $data = $this->_helper->params();
+            
             if(empty($data)) throw new Exception($this->_helper->translate('Invalid Request.'));
             
             $arrErrorMessages = $this->parseValidators($data);
@@ -492,6 +521,7 @@ class Api_RoomsController extends Zend_Rest_Controller{
     }
 
     public function putAction() {
+        unset($this->columnValidators['main_date_start']);
         $this->model->getAdapter()->beginTransaction();
         
         try {
@@ -522,7 +552,10 @@ class Api_RoomsController extends Zend_Rest_Controller{
             $myRoomsCollection = $this->model->findMyRooms(false, $select);
             
             $rRoomProfile = BBBManager_Util_MeetingRoom::detectUserProfileInMeeting($myRoomsCollection->toArray());
-            if($rRoomProfile == null) throw new Exception($this->_helper->translate('Error fetching user profile in meeting room.'));
+            
+            if(($rRoomProfile == null) && (IMDT_Util_Auth::getInstance()->get('user_access_profile') != BBBManager_Config_Defines::$SYSTEM_ADMINISTRATOR_PROFILE)){
+                throw new Exception($this->_helper->translate('Error fetching user profile in meeting room.'));
+            }
             $rRoomProfile = current($rRoomProfile);
             
             if(IMDT_Util_Auth::getInstance()->get('user_access_profile') != BBBManager_Config_Defines::$SYSTEM_ADMINISTRATOR_PROFILE){

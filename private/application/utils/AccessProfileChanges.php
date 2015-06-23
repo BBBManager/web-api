@@ -20,8 +20,24 @@ class BBBManager_Util_AccessProfileChanges {
         return $this->_fileName;
     }
     
-    public function mustChange() {
-	touch($this->_fileName);
+    public function mustChange($userId = null) {
+	if(! file_exists($this->_fileName)){
+            touch($this->_fileName);    
+        }
+        
+        if($userId != null){
+            $current = file_get_contents($this->_fileName);
+            
+            if($current != ''){
+                $rCurrent = json_decode($current);
+            }else{
+                $rCurrent = array();
+            }
+            
+            $rCurrent[] = $userId;
+            
+            file_put_contents($this->_fileName, json_encode($rCurrent));
+        }
     }
     
     public function changesMade() {

@@ -69,61 +69,90 @@ class BBBManager_Model_MeetingRoom extends Zend_Db_Table_Abstract {
     }
 
     public function findMyRooms($roomId = null, $criteria = null) {
-	
-	$publicRoomsSelect = $this->select();
-	$publicRoomsSelect->from(
-            $this->_name, 
+
+        $publicRoomsSelect = $this->select();
+        $publicRoomsSelect->from(
+            $this->_name,
             array(
                 'meeting_room_id',
                 'user_profile' => new Zend_Db_Expr(BBBManager_Config_Defines::$ROOM_ATTENDEE_PROFILE),
                 'group_profile' => new Zend_Db_Expr(BBBManager_Config_Defines::$ROOM_ATTENDEE_PROFILE)
             )
         );
+
+        $publicRoomsSelect->where('privacy_policy = ?', BBBManager_Config_Defines::$PUBLIC_MEETING_ROOM);
+
+        $loggedUsersRoomsSelect = $this->select();
+        $loggedUsersRoomsSelect->from(
+            $this->_name,
+            array(
+                'meeting_room_id',
+                'user_profile' => new Zend_Db_Expr(BBBManager_Config_Defines::$ROOM_ATTENDEE_PROFILE),
+                'group_profile' => new Zend_Db_Expr(BBBManager_Config_Defines::$ROOM_ATTENDEE_PROFILE)
+            )
+        );
+        $loggedUsersRoomsSelect->where('privacy_policy = ?', BBBManager_Config_Defines::$ANY_LOGGED_USER_MEETING_ROOM);
+
+        $userHasGroup = false;
+
+        if(is_array(IMDT_Util_Auth::getInstance()->get('groupIds')) && (count(IMDT_Util_Auth::getInstance()->get('groupIds')) > 0)){
+            $userHasGroup = true;
+        }
+
+        $onlyInvitedUsersRoomsSelect = $this->select()->setIntegrityCheck(false);
+
+        /*if($userHasGroup == true){
+            $onlyInvitedUsersRoomsSelect->from(array('mr' => $this->_name), array('meeting_room_id'));
+        }else{
+            $onlyInvitedUsersRoomsSelect->from(array('mr' => $this->_name), array('meeting_room_id','group_profile' => new Zend_Db_Expr(BBBManager_Config_Defines::$ROOM_ATTENDEE_PROFILE)));
+        }*/
+
+        $onlyInvitedUsersRoomsSelect->from(array('mr' => $this->_name), array('meeting_room_id'));
         
-	$publicRoomsSelect->where('privacy_policy = ?', BBBManager_Config_Defines::$PUBLIC_MEETING_ROOM);
-	
-	$loggedUsersRoomsSelect = $this->select();
-	$loggedUsersRoomsSelect->from(
-            $this->_name, 
-            array(
-                'meeting_room_id',
-                'user_profile' => new Zend_Db_Expr(BBBManager_Config_Defines::$ROOM_ATTENDEE_PROFILE),
-                'group_profile' => new Zend_Db_Expr(BBBManager_Config_Defines::$ROOM_ATTENDEE_PROFILE)
-            )
-        );
-	$loggedUsersRoomsSelect->where('privacy_policy = ?', BBBManager_Config_Defines::$ANY_LOGGED_USER_MEETING_ROOM);
-	
-	$userHasGroup = false;
-	
-	if(is_array(IMDT_Util_Auth::getInstance()->get('groupIds')) && (count(IMDT_Util_Auth::getInstance()->get('groupIds')) > 0)){
-	    $userHasGroup = true;
-	}
-	
-	$onlyInvitedUsersRoomsSelect = $this->select()->setIntegrityCheck(false);
-	$onlyInvitedUsersRoomsSelect->from(array('mr' => $this->_name), array('meeting_room_id'));
-	$onlyInvitedUsersRoomsSelect->joinLeft(
-		array(
-		    'mru'   => 'meeting_room_user'
-		),
-		'mru.meeting_room_id = mr.meeting_room_id AND ' . $this->getDefaultAdapter()->quoteInto('mru.user_id = ?', IMDT_Util_Auth::getInstance()->get('id')),
-		array(
+        /*$onlyInvitedUsersRoomsSelect->joinLeft(
+                array(
+                    'mru'   => 'meeting_room_user'
+                ),
+                'mru.meeting_room_id = mr.meeting_room_id AND ' . $this->getDefaultAdapter()->quoteInto('mru.user_id = ?', IMDT_Util_Auth::getInstance()->get('id')),
+                array(
                     'user_profile' => new Zend_Db_Expr('COALESCE(mru.meeting_room_profile_id,null)')
                 )
-	);
-	$onlyInvitedUsersRoomsSelect->where('mr.privacy_policy = ?', BBBManager_Config_Defines::$ONLY_INVITED_USERS_MEETING_ROOM);
-	
-	if($userHasGroup){
-	    $onlyInvitedUsersRoomsSelect->joinLeft(
-		array(
-		    'mrg'   => 'meeting_room_group'
-		),
-		'mrg.meeting_room_id = mr.meeting_room_id AND ' . $this->getDefaultAdapter()->quoteInto('mrg.group_id in(?)', IMDT_Util_Auth::getInstance()->get('groupIds')),
-		array(
+        );*/
+        /*$onlyInvitedUsersRoomsSelect->where('mr.privacy_policy = ?', BBBManager_Config_Defines::$ONLY_INVITED_USERS_MEETING_ROOM);*/
+
+        if($userHasGroup){
+            $onlyInvitedUsersRoomsSelect->joinLeft(
+                array(
+                    'mru'   => 'meeting_room_user'
+                ),
+                'mru.meeting_room_id = mr.meeting_room_id AND ' . $this->getDefaultAdapter()->quoteInto('mru.user_id = ?', IMDT_Util_Auth::getInstance()->get('id')),
+                array(
+                    'user_profile' => new Zend_Db_Expr('COALESCE(mru.meeting_room_profile_id,null)')
+                )
+            );
+
+            $onlyInvitedUsersRoomsSelect->joinLeft(
+                array(
+                    'mrg'   => 'meeting_room_group'
+                ),
+                'mrg.meeting_room_id = mr.meeting_room_id AND ' . $this->getDefaultAdapter()->quoteInto('mrg.group_id in(?)', IMDT_Util_Auth::getInstance()->get('groupIds')),
+                array(
                     'group_profile' => new Zend_Db_Expr('COALESCE(mrg.meeting_room_profile_id,null)')
                 )
-	    );
-	}
-	
+            );
+        }else{
+            $onlyInvitedUsersRoomsSelect->joinLeft(
+                array(
+                    'mru'   => 'meeting_room_user'
+                ),
+                'mru.meeting_room_id = mr.meeting_room_id AND ' . $this->getDefaultAdapter()->quoteInto('mru.user_id = ?', IMDT_Util_Auth::getInstance()->get('id')),
+                array(
+                    'user_profile' => new Zend_Db_Expr('COALESCE(mru.meeting_room_profile_id,null)'),
+                    'group_profile' => new Zend_Db_Expr('NULL')
+                )
+            );
+        }
+
 	$myRoomsSelect = $publicRoomsSelect;
 	
 	if(IMDT_Util_Auth::getInstance()->get('id') != null){
@@ -150,7 +179,7 @@ class BBBManager_Model_MeetingRoom extends Zend_Db_Table_Abstract {
                 'group_profile'
 	    )
 	);
-	
+        
 	$innerSelect->join(
 	    $this->_name,
 	    'meeting_room.meeting_room_id = myrooms.meeting_room_id',
@@ -174,11 +203,14 @@ class BBBManager_Model_MeetingRoom extends Zend_Db_Table_Abstract {
 		'url',
                 'meeting_mute_on_start',
                 'meeting_lock_on_start',
-                'lock_allow_moderator_locking',
                 'lock_disable_mic_for_locked_users',
                 'lock_disable_cam_for_locked_users',
                 'lock_disable_public_chat_for_locked_users',
-                'lock_disable_private_chat_for_locked_users'
+                'lock_disable_private_chat_for_locked_users',
+                'lock_layout_for_locked_users',
+                'recordings_count' => $this->getSqlForRecordingsCount(),
+                'meeting_room_category_id',
+                'encrypted'
 	    )
 	);
         
@@ -219,9 +251,12 @@ class BBBManager_Model_MeetingRoom extends Zend_Db_Table_Abstract {
 	$select = $this->select()
 		->setIntegrityCheck(false)
 		->from(
-		array(
-		    'mr' => new Zend_Db_Expr('(' . $myRoomsDataSelect . ')')
-		), '*'
+                        array(
+                            'mr' => new Zend_Db_Expr('(' . $myRoomsDataSelect . ')')
+                        ),
+                        array(
+                            '*'
+                        )
 	);
 	
 	$select->joinLeft(
@@ -270,11 +305,13 @@ class BBBManager_Model_MeetingRoom extends Zend_Db_Table_Abstract {
 	    'mr.user_profile',
             'mr.meeting_mute_on_start',
             'mr.meeting_lock_on_start',
-            'mr.lock_allow_moderator_locking',
             'mr.lock_disable_mic_for_locked_users',
             'mr.lock_disable_cam_for_locked_users',
             'mr.lock_disable_public_chat_for_locked_users',
-            'mr.lock_disable_private_chat_for_locked_users'
+            'mr.lock_disable_private_chat_for_locked_users',
+            'mr.lock_layout_for_locked_users',
+            'mr.meeting_room_category_id',
+            'mr.encrypted'
 	);
 	
 	if($userHasGroup){
@@ -480,6 +517,21 @@ class BBBManager_Model_MeetingRoom extends Zend_Db_Table_Abstract {
                     }else{
                         $validRecord[$column] = $value;    
                     }
+                    
+                    if(in_array($column, array('date_start', 'date_end')) !== false){
+                        $ptBrPattern = '/([0-9]{2}).?([0-9]{2}).?([0-9]{4})[\s]*([0-9]{2}).?([0-9]{2})/';
+                        $enUsPattern = '/([0-9]{4}).?([0-9]{2}).?([0-9]{2})[\s]*([0-9]{2}).?([0-9]{2})/';
+
+                        preg_match_all($ptBrPattern, $value, $rPtBrDate);
+                        preg_match_all($enUsPattern, $value, $rEnUsDate);
+
+                        if(is_array($rPtBrDate) && isset($rPtBrDate[0]) && count($rPtBrDate[0]) > 0){
+                            $validRecord[$column] = current($rPtBrDate[3]) . '/' . current($rPtBrDate[2]) . '/' . current($rPtBrDate[1]) . ' ' . current($rPtBrDate[4]) . ':' . current($rPtBrDate[5]);
+                        }elseif(is_array($rEnUsDate) && isset($rEnUsDate[0]) && count($rEnUsDate[0]) > 0){
+                            $validRecord[$column] = $value;
+                        }
+                        continue;
+                    }
 		}
 	    }
             
@@ -489,12 +541,16 @@ class BBBManager_Model_MeetingRoom extends Zend_Db_Table_Abstract {
 	$recordCount = 0;
 	
 	foreach($validRecords as $iRecord => $record){
-            $existsSelect = $this->select();
             //$existsSelect->where(new Zend_Db_Expr('(' . $this->getAdapter()->quoteInto('(login = ?)', $record['login']) . ' or ' . $this->getAdapter()->quoteInto('(email = ?)', $record['email']) . ')'));
-            $existsSelect->where('url = ?', $record['url']);
-            $existsSelect->where(BBBManager_Config_Defines::$ROOM_CLOSED . ' = ?', $this->getSqlForStatus());
             
-            $exists = $this->fetchRow($existsSelect);
+            if(isset($record['url']) && $record['url'] != null){
+                $existsSelect = $this->select();
+                $existsSelect->where('url = ?', $record['url']);
+                $existsSelect->where(BBBManager_Config_Defines::$ROOM_CLOSED . ' = ?', $this->getSqlForStatus());
+                $exists = $this->fetchRow($existsSelect);
+            }else{
+                $exists = null;
+            }
             
             if($exists != null){
                 throw new Exception(sprintf(IMDT_Util_Translate::_('Invalid CSV file, record in line %s already exists.'), ($iRecord + 1)));
@@ -505,5 +561,12 @@ class BBBManager_Model_MeetingRoom extends Zend_Db_Table_Abstract {
 	}
 	
 	return $recordCount;
+    }
+    
+    public function getSqlForRecordingsCount($meetingRoomAlias = null){
+        if($meetingRoomAlias == null){
+            $meetingRoomAlias = 'meeting_room';
+        }
+        return new Zend_Db_Expr('( select count(1) from record where meeting_room_id = ' . $meetingRoomAlias . '.meeting_room_id)');
     }
 }

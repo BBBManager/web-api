@@ -141,6 +141,7 @@ class BBBManager_Model_User extends Zend_Db_Table_Abstract {
 
     public function findByLogin($login) {
 	$select = $this->select();
+        $select->from($this->_name, array('*', 'status' => new Zend_Db_Expr($this->getSqlStatementForActiveUsers())));
 	$select->where('login = ?', $login);
 
 	return $this->fetchRow($select);
@@ -216,5 +217,12 @@ class BBBManager_Model_User extends Zend_Db_Table_Abstract {
 	}
 	
 	return $recordCount;
+    }
+    
+    public function findAdministrators(){
+        $select = $this->select();
+        $select->where('access_profile_id = ?', BBBManager_Config_Defines::$SYSTEM_ADMINISTRATOR_PROFILE);
+        
+        return $this->fetchAll($select);
     }
 }
