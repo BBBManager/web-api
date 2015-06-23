@@ -6,7 +6,7 @@
 <body style="padding: 20px; background-color: rgb(238, 238, 238);">
     <div style="border: 1px solid rgb(215, 215, 215); width: 600px; margin: 0px auto; background-color: rgb(255, 255, 255); border-radius: 5px 5px 5px 5px;">
         <div style="padding: 20px;">
-            <a style="float: left; margin-right: 20px;" href="<?=$this->serverUrl()?>" target="_blank"><img width="250" src="<?=$this->serverUrl()?>/resources/img/logo.png" alt=""></a>
+            <a style="float: left; margin-right: 20px;" href="<?=IMDT_Util_Config::getInstance()->get('web_base_url');?>" target="_blank"><img width="250" src="<?=IMDT_Util_Config::getInstance()->get('web_base_url');?>/resources/img/logo.png" alt=""></a>
             <h1 style="font-family: Verdana; font-size: 20px; margin: 17px 0px; font-weight: normal; color: rgb(37, 37, 37);">
                 <?= empty($this->title) ? 'Contato Através do Site' : $this->title ?>
             </h1>
