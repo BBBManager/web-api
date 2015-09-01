@@ -14,6 +14,13 @@ try {
     
     // Invalidate the auth.ini cache
     BBBManager_Cache_Auth::getInstance()->clean();
+    BBBManager_Cache_GroupSync::getInstance()->clean();
+    BBBManager_Cache_GroupSync::getInstance()->getData();
+    BBBManager_Cache_GroupHierarchy::getInstance()->clean();
+    BBBManager_Cache_GroupHierarchy::getInstance()->getData();
+    BBBManager_Cache_GroupsAccessProfile::getInstance()->clean();
+    BBBManager_Cache_GroupsAccessProfile::getInstance()->getData();
+
     
     $ldapSettings = IMDT_Service_Auth::getInstance()->getSettings();
     /*
