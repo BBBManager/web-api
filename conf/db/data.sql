@@ -7,6 +7,9 @@ INSERT INTO access_profile (access_profile_id, name, create_date) values ( 2, 'S
 INSERT INTO access_profile (access_profile_id, name, create_date) values ( 3, 'Privileged User', SYSDATE());
 INSERT INTO access_profile (access_profile_id, name, create_date) values ( 4, 'System User', SYSDATE());
 
+insert into meeting_room_action (meeting_room_action_id, name) values(1,'Join meeting room');
+insert into meeting_room_action (meeting_room_action_id, name) values(2,'Left meeting room');
+
 INSERT INTO meeting_room_profile (meeting_room_profile_id, name, create_date, last_update) VALUES (1, 'Administrator', SYSDATE(), null);
 INSERT INTO meeting_room_profile (meeting_room_profile_id, name, create_date, last_update) VALUES (2, 'Moderator', SYSDATE(), null);
 INSERT INTO meeting_room_profile (meeting_room_profile_id, name, create_date, last_update) VALUES (3, 'Presenter', SYSDATE(), null);
