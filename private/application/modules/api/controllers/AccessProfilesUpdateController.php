@@ -77,12 +77,12 @@ class Api_AccessProfilesUpdateController extends Zend_Rest_Controller {
         
         $fullUpdate = true;
         $rUsers = array();
-        
+        /*
         if(file_exists(BBBManager_Util_AccessProfileChanges::getInstance()->getFileName()) && (strlen(file_get_contents(BBBManager_Util_AccessProfileChanges::getInstance()->getFileName())) > 0)){
             $rUsers = json_decode(file_get_contents(BBBManager_Util_AccessProfileChanges::getInstance()->getFileName()));
             $fullUpdate = false;
         }
-        
+        */
         $groupsHierarchy = BBBManager_Cache_GroupHierarchy::getInstance()->getData();
         
         if($fullUpdate){
