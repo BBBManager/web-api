@@ -63,13 +63,10 @@ class Api_AccessProfilesUpdateController extends Zend_Rest_Controller {
         BBBManager_Cache_GroupSync::getInstance()->clean();
         BBBManager_Cache_GroupHierarchy::getInstance()->clean();
         BBBManager_Cache_GroupsAccessProfile::getInstance()->clean();
-        BBBManager_Cache_GroupsAccessProfile::getInstance()->clean();
         
         BBBManager_Cache_GroupSync::getInstance()->getData();
         BBBManager_Cache_GroupHierarchy::getInstance()->getData();
         BBBManager_Cache_GroupsAccessProfile::getInstance()->getData();
-        BBBManager_Cache_GroupsAccessProfile::getInstance()->getData();
-        
         
         set_time_limit(0);
         $params = $this->_helper->params();
@@ -77,12 +74,12 @@ class Api_AccessProfilesUpdateController extends Zend_Rest_Controller {
         
         $fullUpdate = true;
         $rUsers = array();
-        /*
+        
         if(file_exists(BBBManager_Util_AccessProfileChanges::getInstance()->getFileName()) && (strlen(file_get_contents(BBBManager_Util_AccessProfileChanges::getInstance()->getFileName())) > 0)){
             $rUsers = json_decode(file_get_contents(BBBManager_Util_AccessProfileChanges::getInstance()->getFileName()));
             $fullUpdate = false;
         }
-        */
+        
         $groupsHierarchy = BBBManager_Cache_GroupHierarchy::getInstance()->getData();
         
         if($fullUpdate){
