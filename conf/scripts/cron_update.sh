@@ -1,7 +1,7 @@
 #!/bin/bash
 date
 echo "Synchronizing LDAP"
-curl 'http://localhost:81/ldap_sync.php' --header "Accept-Language: en"
+curl 'http://localhost:81/apu/ldap-sync' --header "Accept-Language: en"
 echo ;
 
 date
