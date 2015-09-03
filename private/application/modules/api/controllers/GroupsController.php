@@ -257,12 +257,12 @@ class Api_GroupsController extends Zend_Rest_Controller{
             }
             
             $this->model->getAdapter()->commit();
-	    
-	    BBBManager_Cache_GroupSync::getInstance()->clean();
+            
+	    //BBBManager_Cache_GroupSync::getInstance()->clean();
 	    //BBBManager_Cache_GroupSync::getInstance()->getData();
-	    BBBManager_Cache_GroupHierarchy::getInstance()->clean();
+	    //BBBManager_Cache_GroupHierarchy::getInstance()->clean();
 	    //BBBManager_Cache_GroupHierarchy::getInstance()->getData();
-	    BBBManager_Cache_GroupsAccessProfile::getInstance()->clean();
+	    //BBBManager_Cache_GroupsAccessProfile::getInstance()->clean();
 	    //BBBManager_Cache_GroupsAccessProfile::getInstance()->getData();
             
             BBBManager_Util_AccessProfileChanges::getInstance()->mustChange();
@@ -354,9 +354,9 @@ class Api_GroupsController extends Zend_Rest_Controller{
                 $this->model->getAdapter()->query($sqlInsert);
             }
 	    
-	    BBBManager_Cache_GroupSync::getInstance()->clean();
-	    BBBManager_Cache_GroupHierarchy::getInstance()->clean();
-	    BBBManager_Cache_GroupsAccessProfile::getInstance()->clean();
+	    //BBBManager_Cache_GroupSync::getInstance()->clean();
+	    //BBBManager_Cache_GroupHierarchy::getInstance()->clean();
+	    //BBBManager_Cache_GroupsAccessProfile::getInstance()->clean();
             
             BBBManager_Util_AccessProfileChanges::getInstance()->mustChange();
             

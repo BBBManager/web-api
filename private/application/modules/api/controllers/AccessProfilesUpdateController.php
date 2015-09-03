@@ -60,6 +60,17 @@ class Api_AccessProfilesUpdateController extends Zend_Rest_Controller {
     }
 
     public function putAction() {
+        BBBManager_Cache_GroupSync::getInstance()->clean();
+        BBBManager_Cache_GroupHierarchy::getInstance()->clean();
+        BBBManager_Cache_GroupsAccessProfile::getInstance()->clean();
+        BBBManager_Cache_GroupsAccessProfile::getInstance()->clean();
+        
+        BBBManager_Cache_GroupSync::getInstance()->getData();
+        BBBManager_Cache_GroupHierarchy::getInstance()->getData();
+        BBBManager_Cache_GroupsAccessProfile::getInstance()->getData();
+        BBBManager_Cache_GroupsAccessProfile::getInstance()->getData();
+        
+        
         set_time_limit(0);
         $params = $this->_helper->params();
         $pUuid = $params['r'];
