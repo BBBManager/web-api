@@ -1,5 +1,4 @@
 <?php
-
 class Callback_MeetingRoomController extends IMDT_Controller_Abstract {
 
     private $_meetingRoomId;

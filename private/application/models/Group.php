@@ -171,6 +171,8 @@ class BBBManager_Model_Group extends Zend_Db_Table_Abstract {
 	    $groupsHierarchy[$groupId]['access_profile_id'][] = self::$_allGroups[$groupId]['access_profile_id'];
 	    $groupsHierarchy[$groupId]['access_profile_id'] = array_unique($groupsHierarchy[$groupId]['access_profile_id']);
 	}
+        
+        //var_dump($groupsHierarchy);die();
 	
 	return $groupsHierarchy;
     }
