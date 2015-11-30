@@ -164,8 +164,7 @@ class Api_MyRoomsController extends Zend_Rest_Controller {
                     'userId' => $userId,
                     'userIpAddress' => $userIpAddress,
                     'userRoleInMeeting' => $userRoleInMeetingRoom,
-                    'adminKey' => file_get_contents(IMDT_Util_Config::getInstance()->get('bbbmanager_agent_keyfile')),
-                    /* 'adminKey' => 'bbbmanager-vm-key@homolog@mp', */
+                    'adminKey' => trim(file_get_contents(IMDT_Util_Config::getInstance()->get('bbbmanager_agent_keyfile'))),
                     'welcomeMessage' => $welcomeMessage,
                     'callbackURL' => $callbackUrl,
                     'lockLockOnJoin' => $rMyRoomData['meeting_lock_on_start'],
