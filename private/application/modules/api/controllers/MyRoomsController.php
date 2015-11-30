@@ -180,13 +180,13 @@ class Api_MyRoomsController extends Zend_Rest_Controller {
 
                 $bbbApiRequestQueryString = http_build_query($rBbbApiRequest);
 
-                $webBaseUrl = IMDT_Util_Config::getInstance()->get('web_base_url');
+                $webBaseUrl = IMDT_Util_Config::getInstance()->get('bbbmanager_agent_web_base_url');
 
                 if (substr($webBaseUrl, -1) != '/') {
                     $webBaseUrl .= '/';
                 }
 
-                $bbbApiResponse = file_get_contents($webBaseUrl . 'bbbmanager-standalone-agent/api/join/?' . $bbbApiRequestQueryString);
+                $bbbApiResponse = file_get_contents($webBaseUrl . 'api/join/?' . $bbbApiRequestQueryString);
                 $rResponse['success'] = '1';
                 $rResponse['bbbApiResponse'] = $bbbApiResponse;
             }
