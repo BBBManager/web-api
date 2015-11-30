@@ -21,19 +21,19 @@ class Api_RecordTagsController extends Zend_Rest_Controller {
             $optUkExclude = new Zend_Db_Expr("record_tag_id != " . $this->_id);
         }
 
-        $this->columnValidators['name'] = array(new Zend_Validate_NotEmpty()/*,
-            new Zend_Validate_Db_NoRecordExists(
-                    array(
-                'table' => 'record_tag',
-                'field' => 'name',
-                'exclude' => $optUkExclude
-        ))*/);
-        
+        $this->columnValidators['name'] = array(new Zend_Validate_NotEmpty()/* ,
+                  new Zend_Validate_Db_NoRecordExists(
+                  array(
+                  'table' => 'record_tag',
+                  'field' => 'name',
+                  'exclude' => $optUkExclude
+                  )) */);
+
         $this->columnValidators['start_time'] = array(
             new Zend_Validate_Regex(
-                array(
-                    'pattern'   => '/^([01]?[0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])(.[0-9]{3})$/'
-                )
+                    array(
+                'pattern' => '/^([01]?[0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])(.[0-9]{3})$/'
+                    )
             )
         );
 
@@ -132,23 +132,23 @@ class Api_RecordTagsController extends Zend_Rest_Controller {
             foreach ($validators as $currValidator) {
                 $value = $data[$column] ? : '';
                 $originalValue = $data[$column] ? : '';
-                
-                if($currValidator instanceof Zend_Validate_LessThan){
-                    if(isset($data[$column . '_to_validation_value'])){
+
+                if ($currValidator instanceof Zend_Validate_LessThan) {
+                    if (isset($data[$column . '_to_validation_value'])) {
                         $value = $data[$column . '_to_validation_value'];
                     }
                 }
-                
+
                 if (!$currValidator->isValid($value)) {
                     foreach ($currValidator->getMessages() as $errorMessage) {
-                        if($value != $originalValue){
+                        if ($value != $originalValue) {
                             $errorMessage = preg_replace('/\'' . $value . '\'/', $originalValue, $errorMessage);
-                            
-                            if($currValidator instanceof Zend_Validate_LessThan){
+
+                            if ($currValidator instanceof Zend_Validate_LessThan) {
                                 $errorMessage = preg_replace('/\'' . $currValidator->getMax() . '\'/', IMDT_Util_Time::millisecondsTohhmmssmil($currValidator->getMax()), $errorMessage);
                             }
                         }
-                        
+
                         $arrErrorMessages[] = $this->_helper->translate('column-record_tag-' . $column) . ': ' . $errorMessage;
                     }
                     break;
@@ -170,25 +170,25 @@ class Api_RecordTagsController extends Zend_Rest_Controller {
             $data = $this->_helper->params();
             if (empty($data))
                 throw new Exception($this->_helper->translate('Invalid Request.'));
-            
-            if(isset($data['record_id']) && ($data['record_id'] != '')){
+
+            if (isset($data['record_id']) && ($data['record_id'] != '')) {
                 $modelRecord = new BBBManager_Model_Record();
                 $recordRow = $modelRecord->find($data['record_id'])->current();
-                
+
                 $recordingStart = strtotime($recordRow->date_start);
                 $recordingEnd = strtotime($recordRow->date_end);
-                
-                $recordingDuration = (($recordingEnd - $recordingStart)*1000);
-                
+
+                $recordingDuration = (($recordingEnd - $recordingStart) * 1000);
+
                 $data['start_time_to_validation_value'] = IMDT_Util_Time::hhmmssmilToMilliseconds($data['start_time']);
-                
+
                 $currentStartTimeValidators = $this->columnValidators['start_time'];
                 $currentStartTimeValidators[] = new Zend_Validate_LessThan(array('max' => $recordingDuration));
                 $this->columnValidators['start_time'] = $currentStartTimeValidators;
             }
-            
+
             $arrErrorMessages = $this->parseValidators($data);
-            
+
             if (count($arrErrorMessages) > 0) {
                 $this->view->response = array('success' => '0', 'msg' => $arrErrorMessages);
                 return;
@@ -228,7 +228,7 @@ class Api_RecordTagsController extends Zend_Rest_Controller {
             $data = $this->_helper->params();
             if (empty($data))
                 throw new Exception($this->_helper->translate('Invalid Request.'));
-            
+
             $arrErrorMessages = $this->parseValidators($data);
             if (count($arrErrorMessages) > 0) {
                 $this->view->response = array('success' => '0', 'msg' => $arrErrorMessages);

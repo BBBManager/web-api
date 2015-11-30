@@ -82,10 +82,10 @@ class Api_MoodleController extends Zend_Rest_Controller {
 
             if (count($myRoom) == 0) {
                 $meetingRoomUser = new BBBManager_Model_MeetingRoomUser();
-                
+
                 $meetingRoomUser->insert(array(
-                    'user_id'   => IMDT_Util_Auth::getInstance()->get('id'),
-                    'meeting_room_id'   => $meetingRoomId,
+                    'user_id' => IMDT_Util_Auth::getInstance()->get('id'),
+                    'meeting_room_id' => $meetingRoomId,
                     'meeting_room_profile_id' => BBBManager_Config_Defines::$ROOM_ATTENDEE_PROFILE,
                     'auth_mode_id' => ($localuser == '1' ? BBBManager_Config_Defines::$LOCAL_AUTH_MODE : BBBManager_Config_Defines::$LDAP_AUTH_MODE)
                 ));

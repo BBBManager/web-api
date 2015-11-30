@@ -16,8 +16,8 @@ class BBBManager_Model_MeetingRoomCategory extends Zend_Db_Table_Abstract {
 
         return $orderedCategories;
     }
-    
-    public function getAllLeaf($categoriesCollection = null){
+
+    public function getAllLeaf($categoriesCollection = null) {
         if ($categoriesCollection == null) {
             $categoriesCollection = $this->fetchAll();
             $categoriesCollection = $categoriesCollection->toArray();
@@ -25,28 +25,28 @@ class BBBManager_Model_MeetingRoomCategory extends Zend_Db_Table_Abstract {
 
         $orderedCategories = $this->orderedCategories($categoriesCollection);
         $this->updateHierarchy($orderedCategories);
-        
+
         $leafNodes = array();
         $rHierarchy = array();
-        
-        foreach($orderedCategories as $item){
-            if(! isset($item['hierarchy'])){
-                continue;
-            }
-            
-            $rHierarchy[] = $item['hierarchy'];
-        }
-        
-        foreach($orderedCategories as $k => $item){
-            if(! isset($item['hierarchy'])){
+
+        foreach ($orderedCategories as $item) {
+            if (!isset($item['hierarchy'])) {
                 continue;
             }
 
-            if(array_search($item['hierarchy'] . '-' . $item['meeting_room_category_id'], $rHierarchy) === false){
+            $rHierarchy[] = $item['hierarchy'];
+        }
+
+        foreach ($orderedCategories as $k => $item) {
+            if (!isset($item['hierarchy'])) {
+                continue;
+            }
+
+            if (array_search($item['hierarchy'] . '-' . $item['meeting_room_category_id'], $rHierarchy) === false) {
                 $leafNodes[] = $item;
             }
         }
-        
+
         return $leafNodes;
     }
 

@@ -1,12 +1,12 @@
 <?php
+
 return array(
-	'dateFormat'			=> 'mm/dd/yyyy',
-	'dateFormat-datepicker'	=> 'MM/dd/yyyy',
-	'dateFormat-php'		=> 'm/d/Y',
-    'Welcome'               => 'Welcome',
-    'Page not found'        => 'Page not found',
-    'Invalid Credentials'   => 'Invalid Credentials',
-	
+    'dateFormat' => 'mm/dd/yyyy',
+    'dateFormat-datepicker' => 'MM/dd/yyyy',
+    'dateFormat-php' => 'm/d/Y',
+    'Welcome' => 'Welcome',
+    'Page not found' => 'Page not found',
+    'Invalid Credentials' => 'Invalid Credentials',
     'table-meeting_room' => 'Meeting room',
     'column-meeting_room-id' => 'Id',
     'column-meeting_room-name' => 'Meeting room name',
@@ -78,15 +78,11 @@ return array(
     'column-meeting_room-group_attendee' => 'Group (List)',
     'column-meeting_room-group_attendee_name' => 'Group (Name)',
     'column-meeting_room-group_attendee_auth_mode' => 'Group (Auth mode)',
-    
-    
     'column-meeting_room-subject' => 'Subject',
     'column-meeting_room-body' => 'Body',
-    
     'table-meeting_room_action' => 'Action',
     'column-meeting_room_action-id' => 'Id',
     'column-meeting_room_action-name' => 'Action name',
-    
     'table-meeting_room_log' => 'Log',
     'column-meeting_room_log-id' => 'Id',
     'column-meeting_room_log-user' => 'User',
@@ -94,12 +90,10 @@ return array(
     'column-meeting_room_log-user_login' => 'User - Login',
     'column-meeting_room_log-ip_address' => 'Ip Adress',
     'column-meeting_room_log-create_date' => 'Occurred in',
-    
     'table-auth_mode' => 'Auth mode',
     'column-auth_mode-id' => 'Id',
     'column-auth_mode-name' => 'Auth mode name',
     'column-auth_mode-system_key' => 'System key',
-    
     'table-user' => 'User',
     'column-user-id' => 'Id',
     'column-user-name' => 'User name',
@@ -119,7 +113,6 @@ return array(
     'column-user-group' => 'Group (List)',
     'column-user-group_auth_mode' => 'Group (Auth mode)',
     'column-user-group_name' => 'Group (Name)',
-    
     'table-group' => 'Group',
     'column-group-id' => 'Id',
     'column-group-name' => 'Group name',
@@ -137,7 +130,6 @@ return array(
     'column-group-observations' => 'Observations',
     'column-group-create_date' => 'Create date',
     'column-group-last_update' => 'Last update',
-    
     'table-record' => 'Record',
     'column-record-id' => 'Id',
     'column-record-name' => 'Meeting room name',
@@ -146,19 +138,16 @@ return array(
     'column-record-privacy_policy' => 'Privacy Policy',
     'column-record-create_date' => 'Create date',
     'column-record-last_update' => 'Last update',
-    
     'table-record_tag' => 'Tag',
     'column-record_tag-id' => 'Id',
     'column-record_tag-name' => 'Tag name',
     'column-record_tag-create_date' => 'Create date',
     'column-record_tag-last_update' => 'Last update',
-
     'table-access_profile' => 'Access Profile',
     'column-access_profile-id' => 'Id',
     'column-access_profile-name' => 'Access profile name',
     'column-access_profile-create_date' => 'Create date',
     'column-access_profile-last_update' => 'Last update',
-    
     'table-invite_template' => 'Invite template',
     'column-invite_template-id' => 'Id',
     'column-invite_template-name' => 'Invite template name',
@@ -166,14 +155,12 @@ return array(
     'column-invite_template-body' => 'Body',
     'column-invite_template-create_date' => 'Create date',
     'column-invite_template-last_update' => 'Last update',
-    
     'table-maintenance' => 'Maintenance',
     'column-maintenance-id' => 'Id',
     'column-maintenance-description' => 'Description',
     'column-maintenance-active' => 'Active',
     'column-maintenance-create_date' => 'Create date',
     'column-maintenance-last_update' => 'Last update',
-    
     'table-ic_profile' => 'Speed profile',
     'column-ic_profile-id' => 'Id',
     'column-ic_profile-name' => 'Name',
@@ -185,12 +172,10 @@ return array(
     'column-ic_profile-observations' => 'Observations',
     'column-ic_profile-create_date' => 'Create date',
     'column-ic_profile-last_update' => 'Last update',
-    
     'column-audience-online_time' => 'Online time',
     'column-audience-ip_address' => 'Ip address',
     'column-audience-date_join' => 'Date join',
     'column-audience-date_left' => 'Date left',
-    
     'table-access_log' => 'Access Log',
     'column-access_log-id' => 'Id',
     'column-access_log-user_id' => 'User',
@@ -207,7 +192,6 @@ return array(
     'column-access_log-user_auth_mode' => 'User (Auth mode)',
     'column-access_log-user_login' => 'User (Login)',
     'column-access_log-user_name' => 'User (Name)',
-    
     'table-access_log_description' => 'Log description',
     'column-access_log_description-controller' => 'Controller',
     'column-access_log_description-action' => 'Action',

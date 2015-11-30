@@ -69,32 +69,6 @@ class Api_MyRoomsController extends Zend_Rest_Controller {
                 return;
             }
 
-            /* if (count($rMyRoomData) > 0) {
-              $userProfileInMeeting = BBBManager_Config_Defines::$ROOM_ATTENDEE_PROFILE;
-
-              $roomDataInfo = current($rMyRoomData);
-
-              if (isset($roomDataInfo['group_profile'])) {
-              reset($rMyRoomData);
-              foreach ($rMyRoomData as $roomDataInfo) {
-              if ($roomDataInfo['group_profile'] < $userProfileInMeeting) {
-              $userProfileInMeeting = $roomDataInfo['group_profile'];
-              }
-              }
-              }
-
-
-              foreach ($rMyRoomData as $roomDataInfo) {
-              if ($roomDataInfo['user_profile'] != NULL && $roomDataInfo['user_profile'] < $userProfileInMeeting) {
-              $userProfileInMeeting = $roomDataInfo['user_profile'];
-              }
-              }
-              }
-              reset($rMyRoomData);
-
-              $rMyRoomData = current($rMyRoomData);
-              $rMyRoomData['user_profile_in_meeting'] = $userProfileInMeeting; */
-
             $rMyRoomData = BBBManager_Util_MeetingRoom::detectUserProfileInMeeting($rMyRoomData);
             $rMyRoomData = current($rMyRoomData);
 
@@ -132,7 +106,6 @@ class Api_MyRoomsController extends Zend_Rest_Controller {
                 $meetingId = $rMyRoomData['meeting_room_id'];
                 $meetingName = $rMyRoomData['name'];
                 $logoutUrl = IMDT_Util_Config::getInstance()->get('web_base_url');
-                //$logoutUrl = 'http://mp-rs.imdt.com.br.localhost/';
                 $maxParticipants = $rMyRoomData['participants_limit'];
                 $record = $rMyRoomData['record'];
                 $durationMinutes = ((int) ($durationInSeconds / 60));
@@ -140,7 +113,7 @@ class Api_MyRoomsController extends Zend_Rest_Controller {
                 $userId = sprintf('%s_%s', $rMyRoomData['meeting_room_id'], IMDT_Util_Auth::getInstance()->get('id'));
                 $userIpAddress = $_SERVER['REMOTE_ADDR'];
                 $callbackUrl = IMDT_Util_Config::getInstance()->get('api_base_url') . 'callback/meeting-room?tk=' . BBBManager_Util_MeetingRoom::generateHash();
-                //$callbackUrl = 'http://webconf-api-hml.mprs.mp.br/callback/meeting-room?tk=' . BBBManager_Util_MeetingRoom::generateHash();
+
                 $welcomeMessage = sprintf($this->_helper->translate('Welcome to %s meeting.'), '<b>' . $meetingName . '</b>');
                 //$welcomeMessage = '';
 
@@ -192,7 +165,7 @@ class Api_MyRoomsController extends Zend_Rest_Controller {
                     'userIpAddress' => $userIpAddress,
                     'userRoleInMeeting' => $userRoleInMeetingRoom,
                     'adminKey' => IMDT_Util_Config::getInstance()->get('bbbmanager_admin_key'),
-                    /*'adminKey' => 'bbbmanager-vm-key@homolog@mp',*/
+                    /* 'adminKey' => 'bbbmanager-vm-key@homolog@mp', */
                     'welcomeMessage' => $welcomeMessage,
                     'callbackURL' => $callbackUrl,
                     'lockLockOnJoin' => $rMyRoomData['meeting_lock_on_start'],
@@ -208,7 +181,6 @@ class Api_MyRoomsController extends Zend_Rest_Controller {
                 $bbbApiRequestQueryString = http_build_query($rBbbApiRequest);
 
                 $webBaseUrl = IMDT_Util_Config::getInstance()->get('web_base_url');
-                //$webBaseUrl = 'http://webconf-hml.mprs.mp.br';
 
                 if (substr($webBaseUrl, -1) != '/') {
                     $webBaseUrl .= '/';
