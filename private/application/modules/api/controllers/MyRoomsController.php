@@ -164,7 +164,7 @@ class Api_MyRoomsController extends Zend_Rest_Controller {
                     'userId' => $userId,
                     'userIpAddress' => $userIpAddress,
                     'userRoleInMeeting' => $userRoleInMeetingRoom,
-                    'adminKey' => IMDT_Util_Config::getInstance()->get('bbbmanager_admin_key'),
+                    'adminKey' => file_get_contents(IMDT_Util_Config::getInstance()->get('bbbmanager_agent_keyfile')),
                     /* 'adminKey' => 'bbbmanager-vm-key@homolog@mp', */
                     'welcomeMessage' => $welcomeMessage,
                     'callbackURL' => $callbackUrl,
@@ -180,7 +180,7 @@ class Api_MyRoomsController extends Zend_Rest_Controller {
 
                 $bbbApiRequestQueryString = http_build_query($rBbbApiRequest);
 
-                $webBaseUrl = IMDT_Util_Config::getInstance()->get('bbbmanager_agent_web_base_url');
+                $webBaseUrl = IMDT_Util_Config::getInstance()->get('bbbmanager_agent_baseurl');
 
                 if (substr($webBaseUrl, -1) != '/') {
                     $webBaseUrl .= '/';
