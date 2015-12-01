@@ -220,4 +220,5 @@ class IMDT_Service_Auth_Adapter_Ldap {
     private function _checkLocalUser($username) {
         return $this->_userModel->findByLogin($username);
     }
+
 }

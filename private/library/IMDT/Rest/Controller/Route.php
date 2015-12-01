@@ -1,15 +1,13 @@
 <?php
 
-class IMDT_Rest_Controller_Route extends Zend_Controller_Router_Route
-{
+class IMDT_Rest_Controller_Route extends Zend_Controller_Router_Route {
 
     /**
      * @var Zend_Controller_Front
      */
     protected $_front;
-        
-    protected $_actionKey     = 'action';
-    
+    protected $_actionKey = 'action';
+
     /**
      * Prepares the route for mapping by splitting (exploding) it
      * to a corresponding atomic parts. These parts are assigned
@@ -21,16 +19,13 @@ class IMDT_Rest_Controller_Route extends Zend_Controller_Router_Route
      * @param array $reqs Regular expression requirements for variables (keys as variable names)
      * @param Zend_Translate $translator Translator to use for this instance
      */
-    public function __construct(Zend_Controller_Front $front, $route, $defaults = array(), $reqs = array(), Zend_Translate $translator = null, $locale = null)
-    {
-        $this->_front      = $front;
+    public function __construct(Zend_Controller_Front $front, $route, $defaults = array(), $reqs = array(), Zend_Translate $translator = null, $locale = null) {
+        $this->_front = $front;
         $this->_dispatcher = $front->getDispatcher();
-        
+
         parent::__construct($route, $defaults, $reqs, $translator, $locale);
     }
-    
-    
-    
+
     /**
      * Matches a user submitted path with parts defined by a map. Assigns and
      * returns an array of variables on a successful match.
@@ -38,32 +33,31 @@ class IMDT_Rest_Controller_Route extends Zend_Controller_Router_Route
      * @param string $path Path used to match against this routing map
      * @return array|false An array of assigned values or a false on a mismatch
      */
-    public function match($path, $partial = false)
-    {
-        
+    public function match($path, $partial = false) {
+
         $return = parent::match($path, $partial);
 
         // add the RESTful action mapping
         if ($return) {
             $request = $this->_front->getRequest();
-            $path   = $request->getPathInfo();
+            $path = $request->getPathInfo();
             $params = $request->getParams();
 
-            $path   = trim($path, self::URI_DELIMITER);
-            
+            $path = trim($path, self::URI_DELIMITER);
+
             if ($path != '') {
                 $path = explode(self::URI_DELIMITER, $path);
             }
-            
+
             //Store path count for method mapping
             $pathElementCount = count($path);
-            
+
             // Determine Action
             $requestMethod = strtolower($request->getMethod());
             if ($requestMethod != 'get') {
                 if ($request->getParam('_method')) {
                     $return[$this->_actionKey] = strtolower($request->getParam('_method'));
-                } elseif ( $request->getHeader('X-HTTP-Method-Override') ) {
+                } elseif ($request->getHeader('X-HTTP-Method-Override')) {
                     $return[$this->_actionKey] = strtolower($request->getHeader('X-HTTP-Method-Override'));
                 } else {
                     $return[$this->_actionKey] = $requestMethod;
@@ -71,7 +65,7 @@ class IMDT_Rest_Controller_Route extends Zend_Controller_Router_Route
 
                 // Map PUT and POST to actual create/update actions
                 // based on parameter count (posting to resource or collection)
-                switch( $return[$this->_actionKey] ){
+                switch ($return[$this->_actionKey]) {
                     case 'post':
                         if ($pathElementCount > 0) {
                             $return[$this->_actionKey] = 'put';
@@ -83,7 +77,6 @@ class IMDT_Rest_Controller_Route extends Zend_Controller_Router_Route
                         $return[$this->_actionKey] = 'put';
                         break;
                 }
-
             } else {
                 // if the last argument in the path is a numeric value, consider this request a GET of an item
                 $lastParam = array_pop($path);
@@ -93,11 +86,9 @@ class IMDT_Rest_Controller_Route extends Zend_Controller_Router_Route
                     $return[$this->_actionKey] = 'index';
                 }
             }
-            
-        } 
-        
+        }
+
         return $return;
-    
     }
-    
+
 }

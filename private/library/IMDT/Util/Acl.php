@@ -450,7 +450,7 @@ class IMDT_Util_Acl {
                 )
             )
         );
-        
+
         $resourceXRoleXPrivileges[BBBManager_Config_Defines::$ACL_MAINTENANCE_RESOURCE] = array(
             BBBManager_Config_Defines::$SYSTEM_ADMINISTRATOR_PROFILE => array(
                 'methods' => array(
@@ -458,7 +458,7 @@ class IMDT_Util_Acl {
                     'GET',
                     'INDEX',
                     'POST',
-                'PUT'
+                    'PUT'
                 ),
                 'actions' => array(
                     'edit',
