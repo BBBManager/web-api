@@ -111,7 +111,7 @@ class Api_MyRoomsController extends Zend_Rest_Controller {
                 $durationMinutes = ((int) ($durationInSeconds / 60));
                 $userFullName = IMDT_Util_Auth::getInstance()->get('full_name');
                 $userId = sprintf('%s_%s', $rMyRoomData['meeting_room_id'], IMDT_Util_Auth::getInstance()->get('id'));
-                $userIpAddress = $_SERVER['REMOTE_ADDR'];
+                $userIpAddress = Zend_Controller_Front::getInstance()->getRequest()->getHeader('clientIpAddress');
                 $callbackUrl = IMDT_Util_Config::getInstance()->get('api_base_url') . 'callback/meeting-room?tk=' . BBBManager_Util_MeetingRoom::generateHash();
 
                 $welcomeMessage = sprintf($this->_helper->translate('Welcome to %s meeting.'), '<b>' . $meetingName . '</b>');
