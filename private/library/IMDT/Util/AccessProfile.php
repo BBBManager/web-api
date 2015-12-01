@@ -50,11 +50,6 @@ class IMDT_Util_AccessProfile {
             }
         }
 
-        /*
-          $userAccessProfiles = array_unique($userAccessProfiles);
-          $userData['final_access_profiles'] = $userAccessProfiles;
-         */
-
         $userAccessProfile = BBBManager_Config_Defines::$SYSTEM_USER_PROFILE;
 
         if (count($userAccessProfiles) == 0) {

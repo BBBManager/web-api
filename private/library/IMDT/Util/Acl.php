@@ -21,13 +21,6 @@ class IMDT_Util_Acl {
     }
 
     public function isAllowed($resource, $privilege) {
-        /* foreach ($this->_authData['final_access_profiles'] as $profileId) {
-          $allowedByAcl = $allowedByAcl || $this->_aclRules->isAllowed($profileId, strtoupper($resource), strtoupper($privilege));
-
-          if ($allowedByAcl == true) {
-          break;
-          }
-          } */
         return $this->_aclRules->isAllowed($this->_authData['user_access_profile'], strtoupper($resource), strtoupper($privilege));
     }
 
@@ -506,6 +499,22 @@ class IMDT_Util_Acl {
                     'list',
                     'view',
                 )
+            ),
+            BBBManager_Config_Defines::$SYSTEM_USER_PROFILE => array(
+                'methods' => array(
+                    'INDEX'
+                ),
+                'actions' => array(
+                    'list'
+                )
+            ),
+            BBBManager_Config_Defines::$SYSTEM_PRIVILEGED_USER_PROFILE => array(
+                'methods' => array(
+                    'INDEX'
+                ),
+                'actions' => array(
+                    'list'
+                )
             )
         );
 
@@ -702,6 +711,26 @@ class IMDT_Util_Acl {
                     'list',
                     'view',
                 )
+            ),
+            BBBManager_Config_Defines::$SYSTEM_PRIVILEGED_USER_PROFILE => array(
+                'methods' => array(
+                    'GET',
+                    'INDEX',
+                ),
+                'actions' => array(
+                    'list',
+                    'view',
+                )
+            ),
+            BBBManager_Config_Defines::$SYSTEM_USER_PROFILE => array(
+                'methods' => array(
+                    'GET',
+                    'INDEX',
+                ),
+                'actions' => array(
+                    'list',
+                    'view',
+                )
             )
         );
 
@@ -885,7 +914,6 @@ class IMDT_Util_Acl {
         );
 
         $authDataNs = new Zend_Session_Namespace('authData');
-        //$userAccessProfiles = $authDataNs->authData['final_access_profiles'];
         $userAccessProfile = $authDataNs->authData['user_access_profile'];
 
         foreach ($resourceXRoleXPrivileges as $resource => $roleXPrivileges) {

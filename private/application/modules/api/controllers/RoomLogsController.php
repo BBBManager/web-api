@@ -12,6 +12,7 @@ class Api_RoomLogsController extends Zend_Rest_Controller {
         $this->_id = $this->_getParam('id', null);
 
         $this->model = new BBBManager_Model_MeetingRoomLog();
+        $this->_roomsModel = new BBBManager_Model_MeetingRoom();
         //$this->dateColumns = array();
         //$this->datetimeColumns = array('create_date');
         $this->requiredColumns = array('meeting_room_id' => $this->_helper->translate('Meeting Room'), 'user_id' => $this->_helper->translate('User'), 'meeting_room_action' => $this->_helper->translate('Action'));
@@ -81,6 +82,26 @@ class Api_RoomLogsController extends Zend_Rest_Controller {
 
     public function indexAction() {
         try {
+            $userAcessProfileId = IMDT_Util_Auth::getInstance()->get('access_profile_id');
+            
+            $allowedRooms = null;
+
+            //If it's not admin or system support, only allow access to rooms managed by this user
+            //TODO move this logic to a reusable component
+            if(!in_array($userAcessProfileId, array(BBBManager_Config_Defines::$SYSTEM_ADMINISTRATOR_PROFILE,BBBManager_Config_Defines::$SYSTEM_SUPPORT_PROFILE ))) {
+                $allowedRooms = array();
+                //Get rooms that user have access and use as filter
+                $myRoomsCollection = $this->_roomsModel->findMyRooms();
+                $rCollection = ($myRoomsCollection != null ? $myRoomsCollection->toArray() : array());
+                $rCollection = BBBManager_Util_MeetingRoom::detectUserProfileInMeeting($rCollection);
+
+                foreach ($rCollection as $room) {
+                    if (in_array($room['user_profile_in_meeting'], array(BBBManager_Config_Defines::$ROOM_MODERATOR_PROFILE, BBBManager_Config_Defines::$ROOM_ADMINISTRATOR_PROFILE)) != false) {
+                        $allowedRooms[] = $room['meeting_room_id'];
+                    }
+                }
+            }
+
             $select = $this->model->select()
                     ->setIntegrityCheck(false)
                     ->from('meeting_room_log')
@@ -88,6 +109,11 @@ class Api_RoomLogsController extends Zend_Rest_Controller {
                     ->join('meeting_room', 'meeting_room.meeting_room_id = meeting_room_log.meeting_room_id', array('meeting_room_name' => 'name'))
                     ->join('meeting_room_action', 'meeting_room_action.meeting_room_action_id = meeting_room_log.meeting_room_action_id', array('meeting_room_action_name' => 'name'))
                     ->order('meeting_room_log.create_date desc');
+
+            //Apply filter to rooms
+            if ($allowedRooms != null) {
+                $select->where('meeting_room.meeting_room_id in (?)', $allowedRooms);
+            }
 
             $this->filters['meeting_room_id'] = array('column' => 'meeting_room_log.meeting_room_id', 'type' => 'integer');
             $this->filters['user'] = array('column' => 'meeting_room_log.user_id', 'type' => 'integer');

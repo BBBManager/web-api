@@ -91,33 +91,11 @@ class BBBManager_Model_MeetingRoom extends Zend_Db_Table_Abstract {
         );
         $loggedUsersRoomsSelect->where('privacy_policy = ?', BBBManager_Config_Defines::$ANY_LOGGED_USER_MEETING_ROOM);
 
-        $userHasGroup = false;
-
-        if (is_array(IMDT_Util_Auth::getInstance()->get('groupIds')) && (count(IMDT_Util_Auth::getInstance()->get('groupIds')) > 0)) {
-            $userHasGroup = true;
-        }
+        $userHasGroup = (is_array(IMDT_Util_Auth::getInstance()->get('groupIds')) && (count(IMDT_Util_Auth::getInstance()->get('groupIds')) > 0));
 
         $onlyInvitedUsersRoomsSelect = $this->select()->setIntegrityCheck(false);
-
-        /* if($userHasGroup == true){
-          $onlyInvitedUsersRoomsSelect->from(array('mr' => $this->_name), array('meeting_room_id'));
-          }else{
-          $onlyInvitedUsersRoomsSelect->from(array('mr' => $this->_name), array('meeting_room_id','group_profile' => new Zend_Db_Expr(BBBManager_Config_Defines::$ROOM_ATTENDEE_PROFILE)));
-          } */
-
         $onlyInvitedUsersRoomsSelect->from(array('mr' => $this->_name), array('meeting_room_id'));
-
-        /* $onlyInvitedUsersRoomsSelect->joinLeft(
-          array(
-          'mru'   => 'meeting_room_user'
-          ),
-          'mru.meeting_room_id = mr.meeting_room_id AND ' . $this->getDefaultAdapter()->quoteInto('mru.user_id = ?', IMDT_Util_Auth::getInstance()->get('id')),
-          array(
-          'user_profile' => new Zend_Db_Expr('COALESCE(mru.meeting_room_profile_id,null)')
-          )
-          ); */
-        /* $onlyInvitedUsersRoomsSelect->where('mr.privacy_policy = ?', BBBManager_Config_Defines::$ONLY_INVITED_USERS_MEETING_ROOM); */
-
+        
         if ($userHasGroup) {
             $onlyInvitedUsersRoomsSelect->joinLeft(
                     array(
@@ -151,14 +129,6 @@ class BBBManager_Model_MeetingRoom extends Zend_Db_Table_Abstract {
             $myRoomsSelect .= ' UNION ' . $loggedUsersRoomsSelect;
             $myRoomsSelect .= ' UNION ' . $onlyInvitedUsersRoomsSelect;
         }
-
-        /* $select = $this->select()->setIntegrityCheck(false);
-          $select->from(
-          array(
-          'mr' => new Zend_Db_Expr('(' . $myRoomsSelect . ')')
-          ),
-          '*'
-          ); */
 
         $innerSelect = $this->select()->setIntegrityCheck(false);
         $innerSelect->from(
@@ -216,9 +186,7 @@ class BBBManager_Model_MeetingRoom extends Zend_Db_Table_Abstract {
                 array(
             'mru' => 'meeting_room_user'
                 ), 'mru.meeting_room_id = mrd.meeting_room_id AND ' . $this->getDefaultAdapter()->quoteInto('mru.user_id = ?', IMDT_Util_Auth::getInstance()->get('id')),
-                /* array(
-                  'user_profile' => new Zend_Db_Expr('coalesce(mru.meeting_room_profile_id,' . BBBManager_Config_Defines::$SYSTEM_USER_PROFILE . ')')
-                  ) */ null
+                null
         );
 
         if ($userHasGroup) {
@@ -226,9 +194,7 @@ class BBBManager_Model_MeetingRoom extends Zend_Db_Table_Abstract {
                     array(
                 'mrg' => 'meeting_room_group'
                     ), 'mrg.meeting_room_id = mrd.meeting_room_id AND ' . $this->getDefaultAdapter()->quoteInto('mrg.group_id in (?)', IMDT_Util_Auth::getInstance()->get('groupIds')),
-                    /* array(
-                      'group_profile' => new Zend_Db_Expr('coalesce(mrg.meeting_room_profile_id,' . BBBManager_Config_Defines::$SYSTEM_USER_PROFILE . ')')
-                      ) */ null
+                    null
             );
         }
 
@@ -329,112 +295,6 @@ class BBBManager_Model_MeetingRoom extends Zend_Db_Table_Abstract {
         //die($select);
 
         return $this->fetchAll($select);
-
-        /*
-          $innerSelect = $this->select()
-          ->setIntegrityCheck(false)
-          ->from(array('mr'=>$this->_name),
-          array(
-          'meeting_room_id',
-          'name',
-          'date_start',
-          'date_end',
-          'participants_limit',
-          'record',
-          'status' => new Zend_Db_Expr('
-          CASE
-          WHEN date_start > now()
-          THEN ' . BBBManager_Config_Defines::$ROOM_WAITING . '
-          WHEN date_start < now() and date_end > now()
-          THEN ' . BBBManager_Config_Defines::$ROOM_OPENED . '
-          ELSE
-          ' . BBBManager_Config_Defines::$ROOM_CLOSED . '
-          END
-          '),
-          'privacy_policy',
-          'url'
-          )
-          )
-          ->joinLeft(array('mrg'=>'meeting_room_group'), 'mrg.meeting_room_id = mr.meeting_room_id',
-          array(
-          'group_admin_local' => new Zend_Db_Expr("GROUP_CONCAT(distinct case when mrg.meeting_room_profile_id = 1 and mrg.auth_mode_id = 1 then mrg.group_id else null end SEPARATOR ',')"),
-          'group_admin_ldap' => new Zend_Db_Expr("GROUP_CONCAT(distinct case when mrg.meeting_room_profile_id = 1 and mrg.auth_mode_id = 2 then mrg.group_id else null end SEPARATOR ',')"),
-          'group_moderator_local' => new Zend_Db_Expr("GROUP_CONCAT(distinct case when mrg.meeting_room_profile_id = 2 and mrg.auth_mode_id = 1 then mrg.group_id else null end SEPARATOR ',')"),
-          'group_moderator_ldap' => new Zend_Db_Expr("GROUP_CONCAT(distinct case when mrg.meeting_room_profile_id = 2 and mrg.auth_mode_id = 2 then mrg.group_id else null end SEPARATOR ',')"),
-          'group_presenter_local' => new Zend_Db_Expr("GROUP_CONCAT(distinct case when mrg.meeting_room_profile_id = 3 and mrg.auth_mode_id = 1 then mrg.group_id else null end SEPARATOR ',')"),
-          'group_presenter_ldap' => new Zend_Db_Expr("GROUP_CONCAT(distinct case when mrg.meeting_room_profile_id = 3 and mrg.auth_mode_id = 2 then mrg.group_id else null end SEPARATOR ',')"),
-          'group_attendee_local' => new Zend_Db_Expr("GROUP_CONCAT(distinct case when mrg.meeting_room_profile_id = 4 and mrg.auth_mode_id = 1 then mrg.group_id else null end SEPARATOR ',')"),
-          'group_attendee_ldap' => new Zend_Db_Expr("GROUP_CONCAT(distinct case when mrg.meeting_room_profile_id = 4 and mrg.auth_mode_id = 2 then mrg.group_id else null end SEPARATOR ',')")
-          ))
-          ->joinLeft(array('mru'=>'meeting_room_user'), 'mru.meeting_room_id = mr.meeting_room_id',
-          array(
-          'user_admin_local' => new Zend_Db_Expr("GROUP_CONCAT(distinct case when mru.meeting_room_profile_id = 1 and mru.auth_mode_id = 1 then mru.user_id else null end SEPARATOR ',')"),
-          'user_admin_ldap' => new Zend_Db_Expr("GROUP_CONCAT(distinct case when mru.meeting_room_profile_id = 1 and mru.auth_mode_id = 2 then mru.user_id else null end SEPARATOR ',')"),
-          'user_moderator_local' => new Zend_Db_Expr("GROUP_CONCAT(distinct case when mru.meeting_room_profile_id = 2 and mru.auth_mode_id = 1 then mru.user_id else null end SEPARATOR ',')"),
-          'user_moderator_ldap' => new Zend_Db_Expr("GROUP_CONCAT(distinct case when mru.meeting_room_profile_id = 2 and mru.auth_mode_id = 2 then mru.user_id else null end SEPARATOR ',')"),
-          'user_presenter_local' => new Zend_Db_Expr("GROUP_CONCAT(distinct case when mru.meeting_room_profile_id = 3 and mru.auth_mode_id = 1 then mru.user_id else null end SEPARATOR ',')"),
-          'user_presenter_ldap' => new Zend_Db_Expr("GROUP_CONCAT(distinct case when mru.meeting_room_profile_id = 3 and mru.auth_mode_id = 2 then mru.user_id else null end SEPARATOR ',')"),
-          'user_attendee_local' => new Zend_Db_Expr("GROUP_CONCAT(distinct case when mru.meeting_room_profile_id = 4 and mru.auth_mode_id = 1 then mru.user_id else null end SEPARATOR ',')"),
-          'user_attendee_ldap' => new Zend_Db_Expr("GROUP_CONCAT(distinct case when mru.meeting_room_profile_id = 4 and mru.auth_mode_id = 2 then mru.user_id else null end SEPARATOR ',')")
-          ))
-          ->group(array('mr.meeting_room_id', 'mr.name', 'mr.date_start', 'mr.date_end', 'mr.privacy_policy', 'mr.url', 'mr.participants_limit', 'mr.record'));
-
-          $select = $this->select()
-          ->setIntegrityCheck(false)
-          ->from(
-          array(
-          'mr' => new Zend_Db_Expr('(' . $innerSelect . ')')
-          ), '*'
-          );
-
-          if ($public == false) {
-          $select->joinLeft(
-          array(
-          'mruser' => 'meeting_room_user',
-          ), 'mruser.meeting_room_id = mr.meeting_room_id', array(
-          'user_profile' => 'meeting_room_profile_id'
-          )
-          );
-
-          $select->where('mruser.user_id = ?', IMDT_Util_Auth::getInstance()->get('id'));
-
-          if (IMDT_Util_Auth::getInstance()->get('groupIds') != null) {
-          $select->joinLeft(
-          array(
-          'mrgroup' => 'meeting_room_group'
-          ), 'mrgroup.meeting_room_id = mr.meeting_room_id', array(
-          'group_profile' => 'meeting_room_profile_id'
-          )
-          );
-
-          $select->where('mrgroup.group_id in (?)', IMDT_Util_Auth::getInstance()->get('groupIds'));
-          }
-          } else {
-          $select->where('mr.privacy_policy in (?)', array(BBBManager_Config_Defines::$PUBLIC_MEETING_ROOM, BBBManager_Config_Defines::$ANY_LOGGED_USER_MEETING_ROOM));
-          }
-
-          if ($criteria != null) {
-          if (is_array($criteria)) {
-          foreach ($criteria as $field => $value) {
-          if (is_array($value)) {
-          $select->where('mr.' . $field . ' in (?)', $value);
-          } else {
-          $select->where('mr.' . $field . ' = ?', $value);
-          }
-          }
-          } elseif ($criteria instanceof Zend_Db_Select) {
-          $criteria = $criteria->getPart(Zend_Db_Select::WHERE);
-          foreach ($criteria as $criteriaItem) {
-          $select->where(preg_replace('/WHERE|AND/', '', $criteriaItem));
-          }
-          }
-          }
-
-          if ($roomId != null) {
-          $select->where('mr.meeting_room_id = ?', $roomId);
-          }
-
-          return $this->fetchAll($select); */
     }
 
     public function findRoomByUrl($roomUrl) {
