@@ -10,6 +10,7 @@ class IMDT_Util_Ldap {
     private $_usersFromGroupLdapQuery;
     private $_allGroupsFilterLdapQuery;
 
+
     public static function getInstance() {
         if (self::$_instance == null) {
             self::$_instance = new self();
@@ -160,6 +161,10 @@ class IMDT_Util_Ldap {
 
     public function getConnection() {
         return $this->_connection;
+    }
+
+    public function getSettings() {
+        return $this->_settings;
     }
 
     public function findMembersRecursively(&$membersList, $ldapFilter = null) {

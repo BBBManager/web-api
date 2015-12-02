@@ -38,6 +38,7 @@ class BBBManager_Util_MeetingRoom {
                 if ($member['group_auth_mode_id'] == BBBManager_Config_Defines::$LDAP_AUTH_MODE) {
                     $groupHierarchy = BBBManager_Cache_GroupHierarchy::getInstance()->getData();
                     $ldapGroupHierarchy = ( isset($groupHierarchy[$member['group_id']]) ? $groupHierarchy[$member['group_id']]['parents'] : array());
+                    $ldapConfig = IMDT_Util_Ldap::getInstance()->getSettings();
 
                     if (count($ldapGroupHierarchy) > 0) {
                         foreach ($ldapGroupHierarchy as $parent) {
@@ -49,7 +50,7 @@ class BBBManager_Util_MeetingRoom {
                             $usersFromLdapGroup = IMDT_Util_Ldap::getInstance()->fetchUsersFromGroup($parent['name']);
 
                             foreach ($usersFromLdapGroup as $groupMember) {
-                                $memberEmail = $groupMember . '@dominio';
+                                $memberEmail = $groupMember . $ldapConfig['ldap']['account_domain_name_short'];
                                 $rEmailCollection[$memberEmail] = $memberEmail;
                             }
                         }
@@ -57,7 +58,7 @@ class BBBManager_Util_MeetingRoom {
                         $usersFromLdapGroup = IMDT_Util_Ldap::getInstance()->fetchUsersFromGroup($member['group_name']);
 
                         foreach ($usersFromLdapGroup as $groupMember) {
-                            $memberEmail = $groupMember . '@dominio';
+                            $memberEmail = $groupMember . $ldapConfig['ldap']['account_domain_name_short'];
                             $rEmailCollection[$memberEmail] = $memberEmail;
                         }
                     }
