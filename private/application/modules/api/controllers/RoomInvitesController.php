@@ -191,8 +191,10 @@ class Api_RoomInvitesController extends Zend_Rest_Controller {
             if ($defaultFrom['name'] == null) {
                 $defaultFrom['name'] = $defaultFrom['email'];
             }
-
-            $mail->addTo($defaultFrom['email'], $defaultFrom['name']);
+            
+            if ($defaultFrom['email'] != null) {
+                $mail->addTo($defaultFrom['email'], $defaultFrom['name']);
+            }
 
             foreach ($arrTo as $email) {
                 $mail->addBcc($email);
