@@ -162,35 +162,25 @@ class Api_RoomInvitesController extends Zend_Rest_Controller {
             $body = $data['body'];
             $subject = $data['subject'];
 
+            //TODO consume the names from all lang files (because the template can be created in one language and be used in other).
             $tags = array(
                 '__ROOM_START__' => IMDT_Util_Date::filterDatetimeToCurrentLang($rowModel->date_start, false),
                 '__ROOM_END__' => IMDT_Util_Date::filterDatetimeToCurrentLang($rowModel->date_end, false),
                 '__ROOM_NAME__' => $rowModel->name,
                 '__ROOM_URL__' => $url,
-                '__ROOM_PRESENTER__' => $presenters
+                '__ROOM_PRESENTER__' => $presenters,
+                
+                '__INICIO_SALA__' => IMDT_Util_Date::filterDatetimeToCurrentLang($rowModel->date_start, false),
+                '__FIM_SALA__' => IMDT_Util_Date::filterDatetimeToCurrentLang($rowModel->date_end, false),
+                '__NOME_SALA__' => $rowModel->name,
+                '__URL_SALA__' => $url,
+                '__PALESTRANTE_SALA__' => $presenters
             );
-
-            /* foreach($tags as $tag => $value){
-              $body = str_replace($this->_helper->translate($tag), $tag, $body);
-              $subject = str_replace($this->_helper->translate($tag), $tag, $subject);
-              } */
 
             foreach ($tags as $tag => $value) {
                 $body = str_replace($tag, $value, $body);
                 $subject = str_replace($tag, $value, $subject);
             }
-
-            /* $body = str_replace('__ROOM_START__', IMDT_Util_Date::filterDatetimeToCurrentLang($rowModel->date_start, false), $body);
-              $body = str_replace('__ROOM_END__', IMDT_Util_Date::filterDatetimeToCurrentLang($rowModel->date_end, false), $body);
-              $body = str_replace('__ROOM_NAME__', $rowModel->name, $body);
-              $body = str_replace('__ROOM_URL__', $url, $body);
-              $body = str_replace('__ROOM_PRESENTER__', $presenters, $body);
-
-              $subject = str_replace('__ROOM_START__', IMDT_Util_Date::filterDatetimeToCurrentLang($rowModel->date_start, false), $subject);
-              $subject = str_replace('__ROOM_END__', IMDT_Util_Date::filterDatetimeToCurrentLang($rowModel->date_end, false), $subject);
-              $subject = str_replace('__ROOM_NAME__', $rowModel->name, $subject);
-              $subject = str_replace('__ROOM_URL__', $url, $subject);
-              $subject = str_replace('__ROOM_PRESENTER__', $presenters, $subject); */
 
             $mail = new Zend_Mail('utf-8');
             $mail->setBodyHtml($body);
@@ -201,8 +191,10 @@ class Api_RoomInvitesController extends Zend_Rest_Controller {
             if ($defaultFrom['name'] == null) {
                 $defaultFrom['name'] = $defaultFrom['email'];
             }
-
-            $mail->addTo($defaultFrom['email'], $defaultFrom['name']);
+            
+            if ($defaultFrom['email'] != null) {
+                $mail->addTo($defaultFrom['email'], $defaultFrom['name']);
+            }
 
             foreach ($arrTo as $email) {
                 $mail->addBcc($email);
