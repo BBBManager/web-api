@@ -170,8 +170,14 @@ class IMDT_Controller_Helper_ContextSwitch extends Zend_Controller_Action_Helper
                 $pdf->SetSubject('');
                 $pdf->SetKeywords('');
 
+                $pdfTitle = $this->_actionController->getRequest()->getParam('pdf-title', null);
+
+                if(empty($pdfTitle)) {
+                    throw new Exception('Missing request param `pdf-title`.');
+                }
+
                 // set default header data
-                $pdf->SetHeaderData(PDF_HEADER_LOGO, PDF_HEADER_LOGO_WIDTH, 'Administração BBB', 'Exportado em:' . date('d/m/Y H:i'));
+                $pdf->SetHeaderData(PDF_HEADER_LOGO, PDF_HEADER_LOGO_WIDTH, $pdfTitle, 'Exportado em:' . date('d/m/Y H:i'));
 
                 // set header and footer fonts
                 $pdf->setHeaderFont(Array(PDF_FONT_NAME_MAIN, '', PDF_FONT_SIZE_MAIN));
