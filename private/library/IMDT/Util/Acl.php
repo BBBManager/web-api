@@ -544,6 +544,16 @@ class IMDT_Util_Acl {
                     'list',
                     'view',
                 )
+            ),
+            BBBManager_Config_Defines::$SYSTEM_PRIVILEGED_USER_PROFILE => array(
+                'methods' => array(
+                    'GET',
+                    'INDEX',
+                ),
+                'actions' => array(
+                    'list',
+                    'view',
+                )
             )
         );
 
