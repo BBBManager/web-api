@@ -109,23 +109,6 @@ CREATE TABLE `group` (
 -- Table structure for table `group_group`
 --
 
-DROP TABLE IF EXISTS `group_group`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `group_group` (
-  `group_id` int(11) NOT NULL,
-  `auth_mode_id` varchar(45) NOT NULL,
-  `parent_group_id` int(11) NOT NULL,
-  `parent_auth_mode_id` varchar(45) NOT NULL,
-  `create_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`group_id`,`auth_mode_id`,`parent_group_id`,`parent_auth_mode_id`),
-  KEY `fk_group_group_group2_idx` (`parent_group_id`,`parent_auth_mode_id`),
-  KEY `fk_group_group_group1_idx` (`group_id`,`auth_mode_id`),
-  CONSTRAINT `fl_parent_group` FOREIGN KEY (`parent_group_id`) REFERENCES `group` (`group_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `fk_group_group_group1` FOREIGN KEY (`group_id`) REFERENCES `group` (`group_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
 --
 -- Table structure for table `ic_profile`
 --
@@ -497,3 +480,31 @@ CREATE TABLE `user_group` (
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+--Version 2
+create table proc_user_groups (
+    user_id integer not null ,
+    group_id integer not null ,
+    primary key proc_user_groups (user_id, group_id),
+    constraint user_fk foreign key (user_id) references `user` (user_id) on delete cascade on update cascade,
+    constraint group_fk foreign key (group_id) references `group` (group_id) on delete cascade on update cascade
+);
+
+DROP TABLE IF EXISTS `group_group`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `group_group` (
+  `group_id` int(11) NOT NULL,
+  `parent_group_id` int(11) NOT NULL,
+  `create_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`group_id`,`parent_group_id`),
+  KEY `fk_group_group_group2_idx` (`parent_group_id`),
+  KEY `fk_group_group_group1_idx` (`group_id`),
+  CONSTRAINT `fl_parent_group` FOREIGN KEY (`parent_group_id`) REFERENCES `group` (`group_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_group_group_group1` FOREIGN KEY (`group_id`) REFERENCES `group` (`group_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+alter table `group` add column internal_name varchar(500);
+alter table `group` modify access_profile_id int null;
+
