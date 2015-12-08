@@ -1,11 +1,11 @@
 <?php
-
 /**
   Keep local database in sync with LDAP entries
  *  */
 class Api_LdapSyncController extends Zend_Rest_Controller {
 
     public function init() {
+        ini_set('memory_limit', '512M');
         $this->_helper->viewRenderer->setNoRender(true);
         $this->_helper->layout()->disableLayout();
     }
@@ -147,6 +147,9 @@ class Api_LdapSyncController extends Zend_Rest_Controller {
             }
             //Update relations between groups
             if (true) {
+                //Update group list in order to access the ID of the groups
+                $dbGroupList = $this->getLdapGroupsFromDb();
+                
                 $groupGroupModel = new BBBManager_Model_GroupGroup();
                 $selectRelations = $groupGroupModel->select('');
                 $selectRelations->setIntegrityCheck(false);
@@ -168,7 +171,7 @@ class Api_LdapSyncController extends Zend_Rest_Controller {
                     if (!isset($dbGroupMemberOfArray[$child_group])) {
                         $dbGroupMemberOfArray[$child_group] = array();
                     }
-                    $dbGroupMemberOfArray[$child_group][$parent_group] = 1;
+                    $dbGroupMemberOfArray[$child_group][$parent_group] = $relation;
                 }
 
                 //Populate array with group hierarchy in LDAP
@@ -188,7 +191,7 @@ class Api_LdapSyncController extends Zend_Rest_Controller {
                     }
                 }
                 
-                if (true) {
+                if (false) {
                     echo 'DB Group Hierarchy: <br/> <pre>';
                     print_r($dbGroupMemberOfArray);
                     echo '</pre>';
@@ -197,24 +200,67 @@ class Api_LdapSyncController extends Zend_Rest_Controller {
                     print_r($ldapGroupMemberOfArray);
                     echo '</pre>';
                 }
+                
+                //Delete relations that exists in DB and does not exists in LDAP
+                $deletedRelationsCount = 0;
+                foreach($dbGroupMemberOfArray as $dbGroupInternalName => $dbGroupParents ) {
+                    $ldapGroupParents = isset($ldapGroupMemberOfArray[$dbGroupInternalName])?$ldapGroupMemberOfArray[$dbGroupInternalName]:array();
+                    
+                    $relationsToDelete = array_diff_key($dbGroupParents, $ldapGroupParents);
+                    
+                    foreach ($relationsToDelete as $relationToDelete) {
+                        $groupGroupModel->delete('group_id = ' .$relationToDelete['group_id']. ' and parent_group_id = ' . $relationToDelete['parent_group_id']);
+                        $deletedRelationsCount++;
+                    }
+                }
+                
+                echo 'Removed relations:' . $deletedRelationsCount . '<br/>';
+                
+                //Create relations that exists in LDAP and does not exists in DB
+                $insertedRelationsCount = 0;
+                foreach($ldapGroupMemberOfArray as $ldapGroupInternalName => $ldapGroupParents ) {
+                    $dbGroupParents = isset($dbGroupMemberOfArray[$ldapGroupInternalName])?$dbGroupMemberOfArray[$ldapGroupInternalName]:array();
+                    $relationsToInsert = array_diff_key($ldapGroupParents, $dbGroupParents);
+                    
+                    foreach ($relationsToInsert as $ldapParentGroupInternalName => $v) {
+                        $childGroup = $dbGroupList[$ldapGroupInternalName]['group_id'];
+                        $parentGroup = $dbGroupList[$ldapParentGroupInternalName]['group_id'];
+                        
+                        $insertData = array();
+                        $insertData['group_id'] = $childGroup;
+                        $insertData['parent_group_id'] = $parentGroup;
+                        
+                        $groupGroupModel->insert($insertData);
+                        $insertedRelationsCount++;
+                    }
+                }
+                echo 'Inserted relations:' . $insertedRelationsCount . '<br/>';
             }
-
-            die();
-            if (count($ldapMembersList) > 0) {
-                $rLdapMembersList = array();
-                foreach ($ldapMembersList as $ldapMember => $ldapMemberInfo) {
-                    //$rLdapMembersList[strtolower(IMDT_Util_Ldap::ldapNameToCleanName($ldapMember))] = $ldapMemberInfo;
-                    $rLdapMembersList[strtolower(current($ldapMemberInfo['samaccountname']))] = $ldapMemberInfo;
+            
+            //Original code (users)
+            if (count($ldapUserList) > 0) {
+                $userModel = new BBBManager_Model_User();
+                echo '<hr/>';
+                $ldapIndexedByLogin = array();
+                foreach ($ldapUserList as $ldapUser) {
+                    if(!isset($ldapUser['displayname'])) $ldapUser['displayname'] = array('Sem Nome');
+                    $ldapUser['displayname'][0] = utf8_decode($ldapUser['displayname'][0]);
+                    $ldapIndexedByLogin[strtolower(current($ldapUser['samaccountname']))] = $ldapUser;
                 }
 
-                $rDeletes = array_diff_key($rDbLdapUsers, $rLdapMembersList);
-                $rInserts = array_diff_key($rLdapMembersList, $rDbLdapUsers);
-                $rUpdates = array_intersect_key($rDbLdapUsers, $rLdapMembersList);
+                $rDeletes = array_diff_key($dbUserList, $ldapIndexedByLogin);
+                echo 'Users to delete:' . count($rDeletes) . '<br/>';
+                $rInserts = array_diff_key($ldapIndexedByLogin, $dbUserList);
+                echo 'Users to insert:' . count($rInserts) . '<br/>';
+                $rUpdates = array_intersect_key($dbUserList, $ldapIndexedByLogin);
+                echo 'Users to compare:' . count($rUpdates) . '<br/>';
+                
                 $rMustUpdate = array();
 
-                $emailMapping = $ldapSettings['ldap']['key_mapping']['email'];
-                $fullNameMapping = $ldapSettings['ldap']['key_mapping']['full_name'];
-                $loginMapping = $ldapSettings['ldap']['key_mapping']['login'];
+                $ldapSettings = IMDT_Util_Ldap::getInstance()->getSettings();
+                $emailMapping = $ldapSettings['key_mapping']['email'];
+                $fullNameMapping = $ldapSettings['key_mapping']['full_name'];
+                $loginMapping = $ldapSettings['key_mapping']['login'];
 
                 foreach ($rUpdates as $ldapMember => $ldapMemberInfo) {
                     $dataUpdate = array();
@@ -224,10 +270,10 @@ class Api_LdapSyncController extends Zend_Rest_Controller {
                     $dbEmail = $ldapMemberInfo['email'];
                     $dbDn = $ldapMemberInfo['ldap_cn'];
 
-                    $ldapFullName = IMDT_Util_String::camelize(IMDT_Util_String::replaceTags($fullNameMapping, array('displayname' => current($rLdapMembersList[$ldapMember]['displayname'])), true));
-                    $ldapLogin = strtolower(IMDT_Util_String::replaceTags($loginMapping, array('samaccountname' => current($rLdapMembersList[$ldapMember]['samaccountname']))));
-                    $ldapEmail = (isset($rLdapMembersList[$ldapMember]['email']) ? current($rLdapMembersList[$ldapMember]['email']) : IMDT_Util_String::replaceTags($emailMapping, array('samaccountname' => $ldapLogin), true));
-                    $ldapDn = $rLdapMembersList[$ldapMember]['dn'];
+                    $ldapFullName = IMDT_Util_String::camelize(IMDT_Util_String::replaceTags($fullNameMapping, array('displayname' => current($ldapIndexedByLogin[$ldapMember]['displayname'])), true));
+                    $ldapLogin = strtolower(IMDT_Util_String::replaceTags($loginMapping, array('samaccountname' => current($ldapIndexedByLogin[$ldapMember]['samaccountname']))));
+                    $ldapEmail = (isset($ldapIndexedByLogin[$ldapMember]['email']) ? current($ldapIndexedByLogin[$ldapMember]['email']) : IMDT_Util_String::replaceTags($emailMapping, array('samaccountname' => $ldapLogin), true));
+                    $ldapDn = $ldapIndexedByLogin[$ldapMember]['dn'];
 
                     if ($dbFullName != $ldapFullName) {
                         $dataUpdate['name'] = $ldapFullName;
@@ -266,40 +312,38 @@ class Api_LdapSyncController extends Zend_Rest_Controller {
 
                     foreach ($rInserts as $userToInsert) {
                         $ldapLogin = strtolower(IMDT_Util_String::replaceTags($loginMapping, array('samaccountname' => current($userToInsert['samaccountname']))));
+                        //If user does not have a name, it's not imported
+                        if(!isset($userToInsert['displayname']) || !is_array($userToInsert['displayname'])){
+                            continue;
+                        }
 
                         $rInsertData = array(
                             'auth_mode_id' => BBBManager_Config_Defines::$LDAP_AUTH_MODE,
                             'login' => $ldapLogin,
                             'name' => IMDT_Util_String::camelize(IMDT_Util_String::replaceTags($fullNameMapping, array('displayname' => current($userToInsert['displayname'])), true)),
                             'email' => (isset($userToInsert['email']) ? current($userToInsert['email']) : IMDT_Util_String::replaceTags($emailMapping, array('samaccountname' => $ldapLogin), true)),
-                            'ldap_cn' => IMDT_Util_Ldap::ldapNameToCleanName($userToInsert['dn']),
-                            'access_profile_id' => BBBManager_Config_Defines::$SYSTEM_USER_PROFILE
+                            'ldap_cn' => IMDT_Util_Ldap::ldapNameToCleanName($userToInsert['dn'])
                         );
 
                         $userModel->insert($rInsertData);
                     }
                 } catch (Exception $ex) {
+                    echo 'Erro: ' . $ex->getMessage();
+                    die();
                     $adapter->rollBack();
                 }
             }
             $adapter->commit();
 
+            echo count($rDeletes) . ' users inactivated' . '<br/>';
             echo "\n";
+            echo count($rMustUpdate) . ' users updated' . '<br/>';
             echo "\n";
-            echo 'LDAP sync';
-            echo "\n";
-            echo '---------';
-            echo "\n";
-            echo count($rDeletes) . ' users inactivated';
-            echo "\n";
-            echo count($rMustUpdate) . ' users updated';
-            echo "\n";
-            echo count($rInserts) . ' users inserted';
+            echo count($rInserts) . ' users inserted' . '<br/>';
+            die();
         } catch (Exception $ex) {
-            $this->view->response = array(
-                'success' => '0',
-                'msg' => $ex->getMessage()
-            );
+            echo 'Erro: ' . $ex->getMessage();
+            die();
         }
     }
 

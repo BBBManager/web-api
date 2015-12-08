@@ -507,4 +507,5 @@ CREATE TABLE `group_group` (
 
 alter table `group` add column internal_name varchar(500);
 alter table `group` modify access_profile_id int null;
+alter table `user` modify access_profile_id int null;
 

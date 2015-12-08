@@ -31,13 +31,12 @@ class IMDT_Util_Ldap {
         }
 
         $this->_settings = IMDT_Service_Auth::getInstance()->getSettings();
-
         if ((!isset($this->_settings['auth-modes']['ldap'])) || ($this->_settings['auth-modes']['ldap'] == '0')) {
             throw new Exception('LDAP auth-mode not enabled');
         }
-
         $ldapSettings = $this->_settings['ldap'];
-
+        $this->_settings = $ldapSettings;
+        
         $validSettingsForAdapter = array('host', 'port', 'base_dn', 'account_domain_name_short', 'account_canonical_form', 'username', 'password');
         $adapterSettings = array('server' => array());
 
@@ -52,7 +51,7 @@ class IMDT_Util_Ldap {
 
         $ldapAdapter = new Zend_Ldap($adapterSettings['server']);
         $ldapAdapter->connect();
-
+        
         $this->_isConnected = true;
         $this->_connection = $ldapAdapter;
     }
@@ -61,18 +60,29 @@ class IMDT_Util_Ldap {
         return $this->_connection;
     }
 
-    private function getSettings() {
+    public function getSettings() {
         return $this->_settings;
     }
 
     public function fetchAllUsers() {
         $userList = array();
+        
+        $letters = array ();
+        for($i = 0; $i < 26; $i++){
+            $letters[] = chr(65 + $i);
+        }
+        
+        foreach($letters as $letter) {
+            $memberCollection = $this->_connection->search(
+                    '(&'.$this->_allUsersFilterLdapQuery.'(sAMAccountName='.$letter.'*))',
+                    null, Zend_Ldap::SEARCH_SCOPE_SUB, array('objectcategory', 'samaccountname', 'mail', 'displayname', 'memberof', 'objectClass'));
+            $rMemberCollection = (($memberCollection instanceof Zend_Ldap_Collection) ? $memberCollection->toArray() : array());
+            
+            //echo $letter .' - '. count($rMemberCollection) . '<br/>';
 
-        $memberCollection = $this->_connection->search($this->_allUsersFilterLdapQuery, null, Zend_Ldap::SEARCH_SCOPE_SUB, array('objectcategory', 'samaccountname', 'mail', 'displayname', 'memberof', 'objectClass'));
-        $rMemberCollection = (($memberCollection instanceof Zend_Ldap_Collection) ? $memberCollection->toArray() : array());
-
-        foreach ($rMemberCollection as $ldapMember) {
-            $userList[$ldapMember['dn']] = $ldapMember;
+            foreach ($rMemberCollection as $ldapMember) {
+                $userList[$ldapMember['dn']] = $ldapMember;
+            }
         }
 
         return $userList;
