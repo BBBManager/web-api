@@ -35,7 +35,6 @@ class IMDT_Util_Ldap {
             throw new Exception('LDAP auth-mode not enabled');
         }
         $ldapSettings = $this->_settings['ldap'];
-        $this->_settings = $ldapSettings;
         
         $validSettingsForAdapter = array('host', 'port', 'base_dn', 'account_domain_name_short', 'account_canonical_form', 'username', 'password');
         $adapterSettings = array('server' => array());
@@ -63,7 +62,7 @@ class IMDT_Util_Ldap {
     public function getSettings() {
         return $this->_settings;
     }
-
+    
     public function fetchAllUsers() {
         $userList = array();
         

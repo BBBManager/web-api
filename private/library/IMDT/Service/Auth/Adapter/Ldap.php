@@ -23,7 +23,7 @@ class IMDT_Service_Auth_Adapter_Ldap {
         $ldapAdapterConfig = array('server' => array());
 
         foreach ($this->_settings['ldap'] as $key => $value) {
-            if (in_array($key, array('key_mapping', 'group_list_cache_ttl', 'group_list_exclude', 'groups_from_user_query', 'users_from_group_query', 'all_groups_filter_query', 'users_sync_query'))) {
+            if (in_array($key, array('key_mapping', 'all_groups_filter_query', 'all_users_filter_query'))) {
                 continue;
             }
             $ldapAdapterConfig['server'][IMDT_Util_String::underscoreToCamelCase($key)] = $value;

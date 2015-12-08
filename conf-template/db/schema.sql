@@ -509,3 +509,57 @@ alter table `group` add column internal_name varchar(500);
 alter table `group` modify access_profile_id int null;
 alter table `user` modify access_profile_id int null;
 
+create table proc_group_recursive
+(
+    group_id integer not null,
+    ancestry_group_id integer not null,
+    primary key (group_id, ancestry_group_id)
+);
+
+DELIMITER $$
+CREATE PROCEDURE `update_security`()
+    READS SQL DATA
+BEGIN
+    DECLARE rowCount INT;
+  
+    delete from proc_group_recursive;
+    insert into proc_group_recursive (group_id, ancestry_group_id) select group_id, parent_group_id from group_group gg ;
+
+    set rowCount = 1;
+
+    while rowCount > 0 DO
+        insert into proc_group_recursive (group_id, ancestry_group_id)
+        select pgr.group_id, gg.parent_group_id from proc_group_recursive pgr
+            inner join group_group gg  on gg.group_id = pgr.ancestry_group_id
+        where not exists (
+            select 1 from proc_group_recursive pgr2 where pgr2.group_id=pgr.group_id and pgr2.ancestry_group_id = gg.parent_group_id
+        ) and pgr.group_id <> gg.parent_group_id;
+        
+        set rowCount =  ROW_COUNT();
+    end while;
+
+    delete from proc_user_groups;
+    insert into proc_user_groups
+    select 
+    distinct user_id, group_id from user_group
+    union 
+    select distinct  user_id, ancestry_group_id from user_group ug inner join proc_group_recursive pgr on pgr.group_id = ug.group_id;
+    
+    update `user` dest 
+    join (
+        select user_id, min(access_profile_id) access_profile_id from proc_user_groups pug inner join `group` g on pug.group_id = g.group_id
+        where access_profile_id is not null
+        group by user_id
+    ) uap on uap.user_id = dest.user_id
+    set dest.access_profile_id = uap.access_profile_id
+    where 
+    (
+        (dest.access_profile_id <> uap.access_profile_id)
+        or (dest.access_profile_id is null and uap.access_profile_id is not null)
+        or (dest.access_profile_id is not null and uap.access_profile_id is null)
+    );
+
+    update `group` set visible = true where name in ('BBBMANAGER_USER', 'BBBMANAGER_ADM' ) ;
+
+END$$
+DELIMITER ;
