@@ -160,8 +160,6 @@ class Api_LdapSyncController extends Zend_Rest_Controller {
                         ->where(' g.auth_mode_id = ' . BBBManager_Config_Defines::$LDAP_AUTH_MODE . ' and parentg.auth_mode_id = ' . BBBManager_Config_Defines::$LDAP_AUTH_MODE);
 
                 $arrayRelations = $groupGroupModel->fetchAll($selectRelations)->toArray();
-
-                //Populate array with group hierarchy in DB
                 //array [ child ] [ parent ] = 1;
                 $dbGroupMemberOfArray = array();
                 foreach ($arrayRelations as $relation) {
@@ -237,7 +235,7 @@ class Api_LdapSyncController extends Zend_Rest_Controller {
                 echo 'Inserted relations:' . $insertedRelationsCount . '<br/>';
             }
             
-            //Original code (users)
+            //User sync code (not refactored)
             if (count($ldapUserList) > 0) {
                 $userModel = new BBBManager_Model_User();
                 echo '<hr/>';
@@ -335,16 +333,114 @@ class Api_LdapSyncController extends Zend_Rest_Controller {
             }
             $adapter->commit();
 
-            echo count($rDeletes) . ' users inactivated' . '<br/>';
+            echo 'Users inactivated: ' . count($rDeletes) . '' . '<br/>';
             echo "\n";
-            echo count($rMustUpdate) . ' users updated' . '<br/>';
+            echo 'Users updated: ' . count($rMustUpdate) . '<br/>';
             echo "\n";
-            echo count($rInserts) . ' users inserted' . '<br/>';
-            die();
+            echo 'Users inserted: ' . count($rInserts) . '<br/>';
+            
+            
+            
+            //Update relations between users and groups
+            if (true) {
+                echo '<hr/>';
+                //Update user list in order to access the ID of the users
+                $dbUserList = $this->getLdapUsersFromDb();
+                
+                $userGroupModel = new BBBManager_Model_UserGroup();
+                $selectRelations = $userGroupModel->select('');
+                $selectRelations->setIntegrityCheck(false);
+
+                $selectRelations = $selectRelations->from(array('ug' => 'user_group'))
+                        ->join(array('g' => 'group'), 'ug.group_id = g.group_id', 'g.internal_name')
+                        ->join(array('u' => 'user'),  'ug.user_id  = u.user_id' , 'u.login')
+                        ->where(' g.auth_mode_id = ' . BBBManager_Config_Defines::$LDAP_AUTH_MODE . ' and u.auth_mode_id = ' . BBBManager_Config_Defines::$LDAP_AUTH_MODE);
+
+                $arrayRelations = $userGroupModel->fetchAll($selectRelations)->toArray();
+                
+                //array [ user ] [ group ] = 1;
+                $dbUserMemberOfArray = array();
+                foreach ($arrayRelations as $relation) {
+                    $user_login = $relation ['login'];
+                    $group_internal_name = $relation ['internal_name'];
+
+                    if (!isset($dbUserMemberOfArray[$user_login])) {
+                        $dbUserMemberOfArray[$user_login] = array();
+                    }
+                    $dbUserMemberOfArray[$user_login][$group_internal_name] = $relation;
+                }
+
+                //Populate array with user and group hierarchy in LDAP
+                //array [ user ] [ group ] = 1;
+                $ldapUserMemberOfArray = array();
+
+                foreach ($ldapUserList as $ldapUser) {
+                    if(!isset($ldapUser['memberof']))
+                        continue;
+                    $ldapUserKey = strtolower(IMDT_Util_String::replaceTags($loginMapping, array('samaccountname' => current($ldapUser['samaccountname']))));
+
+                    if (!isset($ldapUserMemberOfArray[$ldapUserKey]))
+                        $ldapUserMemberOfArray[$ldapUserKey] = array();
+
+                    foreach ($ldapUser['memberof'] as $ldapMemberOf) {
+                        $ldapUserMemberOfArray[$ldapUserKey][$ldapMemberOf] = 1;
+                    }
+                }
+                
+                if (false) {
+                    echo 'DB User Hierarchy: <br/> <pre>';
+                    print_r($dbUserMemberOfArray);
+                    echo '</pre>';
+
+                    echo 'LDAP User Hierarchy: <br/> <pre>';
+                    print_r($ldapUserMemberOfArray);
+                    echo '</pre>';
+                    die();
+                }
+                
+                //Delete relations that exists in DB and does not exists in LDAP
+                $deletedRelationsCount = 0;
+                foreach($dbUserMemberOfArray as $dbUserInternalName => $dbUserGroups ) {
+                    $ldapUserGroups = isset($ldapUserMemberOfArray[$dbUserInternalName])?$ldapUserMemberOfArray[$dbUserInternalName]:array();
+                    
+                    $relationsToDelete = array_diff_key($dbUserGroups, $ldapUserGroups);
+                    
+                    foreach ($relationsToDelete as $relationToDelete) {
+                        $userGroupModel->delete('group_id = ' .$relationToDelete['group_id']. ' and user_id = ' . $relationToDelete['user_id']);
+                        $deletedRelationsCount++;
+                    }
+                }
+                
+                echo 'Removed relations:' . $deletedRelationsCount . '<br/>';
+                
+                //Create relations that exists in LDAP and does not exists in DB
+                $insertedRelationsCount = 0;
+                foreach($ldapUserMemberOfArray as $ldapUserKey => $ldapUserGroups ) {
+                    $dbUserGroups = isset($dbUserMemberOfArray[$ldapUserKey])?$dbUserMemberOfArray[$ldapUserKey]:array();
+                    $relationsToInsert = array_diff_key($ldapUserGroups, $dbUserGroups);
+                    
+                    foreach ($relationsToInsert as $ldapGroupInternalName => $v) {
+                        $group_id = $dbGroupList[$ldapGroupInternalName]['group_id'];
+                        $user_id = $dbUserList[$ldapUserKey]['user_id'];
+                        
+                        $insertData = array();
+                        $insertData['group_id'] = $group_id;
+                        $insertData['user_id']  = $user_id;
+                        
+                        $userGroupModel->insert($insertData);
+                        $insertedRelationsCount++;
+                    }
+                }
+                echo 'Inserted relations:' . $insertedRelationsCount . '<br/>';
+            }
+            
         } catch (Exception $ex) {
             echo 'Erro: ' . $ex->getMessage();
             die();
         }
+        
+        
+        die();
     }
 
     public function postAction() {
