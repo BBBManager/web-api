@@ -132,6 +132,9 @@ final class BBBManager_Config_Defines
         if ($rAccessProfile == null) {
             return $rAccessProfile;
         } else {
+            if(!isset($rAccessProfile[$accessProfileId])) {
+                throw new Exception ('Unknown access profile ID: ' . $accessProfileId);
+            }
             return $rAccessProfile[$accessProfileId];
         }
     }
