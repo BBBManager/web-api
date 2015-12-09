@@ -67,7 +67,7 @@ class IMDT_Service_Auth {
         }
 
         $userGroupModel = new BBBManager_Model_UserGroup();
-        $userGroups = $userGroupModel->findByUserId($userId);
+        $userGroups = $userGroupModel->findEffectiveByUserId($userId);
         $authData['userGroups'] = ($userGroups != null ? $userGroups->toArray() : array());
 
 //        $groupsModel = new BBBManager_Model_Group();
