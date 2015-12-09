@@ -18,7 +18,14 @@ class Api_UsersController extends Zend_Rest_Controller {
                 ->from('user', array('user_id', 'name', 'email', 'login', 'auth_mode_id', 'access_profile_id', 'observations', 'create_date', 'last_update', 'ldap_cn',
                     'valid_from', 'valid_to',
                     'actived' => new Zend_Db_Expr('IF((valid_from <= current_date or valid_from is null) and (valid_to >= current_date or valid_to is null),true, false)')))
-                ->joinLeft('user_group', 'user_group.user_id = user.user_id', array('groups' => new Zend_Db_Expr('GROUP_CONCAT(distinct user_group.group_id SEPARATOR ",")')))
+                ->joinLeft(array('ug_local' => 'user_group'), 'ug_local.user_id = user.user_id', null)
+                ->joinLeft(array('g_local' => 'group'), 'g_local.group_id = ug_local.group_id AND g_local.auth_mode_id = '.BBBManager_Config_Defines::$LOCAL_AUTH_MODE, array(
+                    'groups' => new Zend_Db_Expr('GROUP_CONCAT(distinct g_local.group_id SEPARATOR ",")')
+                ))
+                ->joinLeft(array('ug_ldap' => 'user_group'), 'ug_ldap.user_id = user.user_id', null)
+                ->joinLeft(array('g_ldap' => 'group'), 'g_ldap.group_id = ug_ldap.group_id AND g_ldap.auth_mode_id = '.BBBManager_Config_Defines::$LDAP_AUTH_MODE, array(
+                    'ldapGroups' => new Zend_Db_Expr('GROUP_CONCAT(distinct g_ldap.group_id SEPARATOR ",")')
+                ))
                 ->group(array('user.user_id', 'user.name', 'user.email', 'user.login', 'user.auth_mode_id', 'user.access_profile_id', 'user.create_date', 'user.last_update', 'user.ldap_cn'))
                 ->order('user.name asc');
 
@@ -176,24 +183,10 @@ class Api_UsersController extends Zend_Rest_Controller {
                 throw new Exception(sprintf($this->_helper->translate('User %s not found.'), $this->_id));
 
             if (IMDT_Util_Auth::getInstance()->get('access_profile_id') != BBBManager_Config_Defines::$SYSTEM_ADMINISTRATOR_PROFILE && IMDT_Util_Auth::getInstance()->get('access_profile_id') != BBBManager_Config_Defines::$SYSTEM_SUPPORT_PROFILE && IMDT_Util_Auth::getInstance()->get('access_profile_id') != BBBManager_Config_Defines::$SYSTEM_PRIVILEGED_USER_PROFILE && IMDT_Util_Auth::getInstance()->get('id') != $this->_id) {
-
                 throw new Exception($this->_helper->translate('No permission to perform this action.'));
             }
 
             $this->rowHandler($rowModel);
-
-            if ($rowModel['auth_mode_id'] == BBBManager_Config_Defines::$LDAP_AUTH_MODE) {
-                if (trim($rowModel['ldap_cn']) != '') {
-                    $ldapGroups = IMDT_Util_Ldap::getInstance()->fetchGroupsFromUser($rowModel['ldap_cn']);
-
-                    if (is_array($ldapGroups) && (count($ldapGroups) > 0)) {
-                        foreach ($ldapGroups as $ldapGroup) {
-                            $rGroupName = explode(',', $ldapGroup);
-                            $rowModel['ldapGroups'][] = current($rGroupName);
-                        }
-                    }
-                }
-            }
 
             $arrResponse = array();
             $arrResponse['row'] = $rowModel;

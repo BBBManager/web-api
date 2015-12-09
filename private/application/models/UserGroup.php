@@ -20,7 +20,7 @@ class BBBManager_Model_UserGroup extends Zend_Db_Table_Abstract {
             'onUpdate' => self::CASCADE_RECURSE)
     );
 
-    public function findByUserId($userId) {
+    public function findEffectiveByUserId($userId) {
         $select = $this->select()->setIntegrityCheck(false);
 
         $select->from(array('ug' => 'proc_user_groups'), array('user_id', 'group_id'))
@@ -30,5 +30,17 @@ class BBBManager_Model_UserGroup extends Zend_Db_Table_Abstract {
 
         return $this->fetchAll($select);
     }
+
+    public function findByUserId($userId) {
+        $select = $this->select()->setIntegrityCheck(false);
+
+        $select->from(array('ug' => 'proc_user_groups'), array('user_id', 'group_id'))
+            ->join(array('g' => 'user'), 'g.user_id = ug.user_id', array('access_profile_id'));
+
+        $select->where('ug.user_id = ?', $userId);
+
+        return $this->fetchAll($select);
+    }
+
 
 }
