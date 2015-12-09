@@ -93,6 +93,8 @@ class Api_UsersController extends Zend_Rest_Controller {
     }
 
     public function rowHandler(&$row) {
+        //$row['name'] = 'TESTEE';
+
         $row['access_profile'] = BBBManager_Config_Defines::getAccessProfile($row['access_profile_id']);
         $row['auth_mode'] = BBBManager_Config_Defines::getAuthMode($row['auth_mode_id']);
         $row['actived'] = $row['actived'] ? $this->_helper->translate('Yes') : $this->_helper->translate('No');
