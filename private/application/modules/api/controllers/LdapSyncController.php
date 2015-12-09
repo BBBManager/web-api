@@ -242,7 +242,7 @@ class Api_LdapSyncController extends Zend_Rest_Controller {
                 $ldapIndexedByLogin = array();
                 foreach ($ldapUserList as $ldapUser) {
                     if(!isset($ldapUser['displayname'])) $ldapUser['displayname'] = array('Sem Nome');
-                    $ldapUser['displayname'][0] = utf8_decode($ldapUser['displayname'][0]);
+                    $ldapUser['displayname'][0] = $ldapUser['displayname'][0];
                     $ldapIndexedByLogin[strtolower(current($ldapUser['samaccountname']))] = $ldapUser;
                 }
 
