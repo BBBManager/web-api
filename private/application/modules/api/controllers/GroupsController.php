@@ -51,10 +51,11 @@ class Api_GroupsController extends Zend_Rest_Controller {
         $this->select = $this->model->select()
                 ->setIntegrityCheck(false)
                 ->from(array('g' => 'group'), array('group_id', 'name', 'auth_mode_id', 'access_profile_id', 'observations', 'visible'))
-                ->joinLeft('user_group', 'user_group.group_id = g.group_id', array('user_attendee' => new Zend_Db_Expr('GROUP_CONCAT(distinct user_group.user_id SEPARATOR ",")')))
+                ->joinLeft(array('ug' => 'proc_user_groups'), 'ug.group_id = g.group_id', array('user_attendee' => new Zend_Db_Expr('GROUP_CONCAT(distinct ug.user_id SEPARATOR ",")')))
                 //->joinLeft('user','user.user_id = user_group.user_id',array())
-                ->joinLeft('group_group', 'group_group.parent_group_id = g.group_id', array('group_attendee_local' => new Zend_Db_Expr('GROUP_CONCAT(distinct case when group_group.auth_mode_id = 1 then group_group.group_id else null end SEPARATOR ",")'),
-                    'group_attendee_ldap' => new Zend_Db_Expr('GROUP_CONCAT(distinct case when group_group.auth_mode_id = 2 then group_group.group_id else null end SEPARATOR ",")')
+                ->joinLeft('group_group', 'group_group.parent_group_id = g.group_id', array(
+                    'group_attendee_local' => new Zend_Db_Expr('GROUP_CONCAT(distinct case when g.auth_mode_id = 1 then g.group_id else null end SEPARATOR ",")'),
+                    'group_attendee_ldap' => new Zend_Db_Expr('GROUP_CONCAT(distinct case when g.auth_mode_id = 2 then g.group_id else null end SEPARATOR ",")')
                 ))
                 ->where('case when g.auth_mode_id = ' . BBBManager_Config_Defines::$LDAP_AUTH_MODE . ' then visible = true else 1 = 1 end')
                 ->group(array('g.group_id', 'g.name', 'g.auth_mode_id', 'g.access_profile_id'))
@@ -250,8 +251,8 @@ class Api_GroupsController extends Zend_Rest_Controller {
             }
 
             if (strlen(trim($groups)) > 0) {
-                $sqlInsert = 'insert into group_group(parent_group_id,parent_auth_mode_id,group_id,auth_mode_id) 
-                                select ' . $this->_id . ', ' . $rowModel->auth_mode_id . ',  g.group_id, g.auth_mode_id
+                $sqlInsert = 'insert into group_group(parent_group_id,group_id)
+                                select ' . $this->_id . ', g.group_id
                                 from `group` g where g.group_id in (' . $groups . ') and g.group_id != ' . $this->_id;
                 $this->model->getAdapter()->query($sqlInsert);
             }
@@ -320,8 +321,8 @@ class Api_GroupsController extends Zend_Rest_Controller {
             $this->doConversions($rowModel);
             $rowModel->save();
 
-
-            $users = $data['user_attendee'];
+            $users = implode(',', array_filter(explode(',', $data['user_attendee'])));
+            //Zend_Debug::dump($users); die;
             if (strlen(trim($users)) == 0) {
                 $this->model->getAdapter()->query('delete from user_group where group_id = ' . $this->_id);
             } else {
@@ -346,8 +347,8 @@ class Api_GroupsController extends Zend_Rest_Controller {
                 $this->model->getAdapter()->query('delete from group_group where parent_group_id = ' . $this->_id);
             } else {
                 $this->model->getAdapter()->query('delete from group_group where parent_group_id = ' . $this->_id . ' and group_id not in (' . $groups . ')');
-                $sqlInsert = 'insert into group_group(parent_group_id,parent_auth_mode_id,group_id,auth_mode_id) 
-                                select ' . $this->_id . ', ' . $rowModel->auth_mode_id . ',  g.group_id, g.auth_mode_id
+                $sqlInsert = 'insert into group_group(parent_group_id,group_id)
+                                select ' . $this->_id . ', g.group_id
                                 from `group` g where g.group_id in (' . $groups . ')  and g.group_id != ' . $this->_id . ' 
                                                             and not exists
                                                             (select 1 from group_group  gg
@@ -367,6 +368,8 @@ class Api_GroupsController extends Zend_Rest_Controller {
             $this->view->response = array('success' => '1', 'msg' => $this->_helper->translate('Group has been successfully changed.'));
         } catch (Exception $e) {
             $this->model->getAdapter()->rollBack();
+            echo $e->getMessage();
+            echo $e->getTraceAsString(); die;
             $this->view->response = array('success' => '0', 'msg' => $e->getMessage());
         }
     }

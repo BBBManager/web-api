@@ -22,6 +22,9 @@ class BBBManager_Util_AccessProfileChanges {
     }
 
     public function mustChange($userId = null) {
+        return BBBManager_Util_AccessProfileChanges::callProcUpdateSecurity();
+
+        /* OLD CODE
         if (!file_exists($this->_fileName)) {
             touch($this->_fileName);
         }
@@ -39,6 +42,7 @@ class BBBManager_Util_AccessProfileChanges {
 
             file_put_contents($this->_fileName, json_encode($rCurrent));
         }
+        */
     }
 
     public function changesMade() {
@@ -63,4 +67,9 @@ class BBBManager_Util_AccessProfileChanges {
         }
     }
 
+    public static function callProcUpdateSecurity() {
+        $db = Zend_Db_Table::getDefaultAdapter();
+        $stmt = $db->query("CALL update_security()");
+        return $stmt->execute();
+    }
 }

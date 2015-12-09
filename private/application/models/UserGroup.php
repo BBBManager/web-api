@@ -23,8 +23,8 @@ class BBBManager_Model_UserGroup extends Zend_Db_Table_Abstract {
     public function findByUserId($userId) {
         $select = $this->select()->setIntegrityCheck(false);
 
-        $select->from(array('ug' => 'user_group'), array('user_id', 'group_id'))
-                ->join(array('g' => 'group'), 'g.group_id = ug.group_id', array('access_profile_id'));
+        $select->from(array('ug' => 'proc_user_groups'), array('user_id', 'group_id'))
+                ->join(array('g' => 'user'), 'g.user_id = ug.user_id', array('access_profile_id'));
 
         $select->where('ug.user_id = ?', $userId);
 

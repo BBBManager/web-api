@@ -15,7 +15,9 @@ class Api_UsersController extends Zend_Rest_Controller {
 
         $this->select = $this->model->select()
                 ->setIntegrityCheck(false)
-                ->from('user', array('user_id', 'name', 'email', 'login', 'auth_mode_id', 'access_profile_id', 'observations', 'create_date', 'last_update', 'ldap_cn', 'valid_from', 'valid_to', 'actived' => new Zend_Db_Expr('IF((valid_from <= current_date or valid_from is null) and (valid_to >= current_date or valid_to is null),true, false)')))
+                ->from('user', array('user_id', 'name', 'email', 'login', 'auth_mode_id', 'access_profile_id', 'observations', 'create_date', 'last_update', 'ldap_cn',
+                    'valid_from', 'valid_to',
+                    'actived' => new Zend_Db_Expr('IF((valid_from <= current_date or valid_from is null) and (valid_to >= current_date or valid_to is null),true, false)')))
                 ->joinLeft('user_group', 'user_group.user_id = user.user_id', array('groups' => new Zend_Db_Expr('GROUP_CONCAT(distinct user_group.group_id SEPARATOR ",")')))
                 ->group(array('user.user_id', 'user.name', 'user.email', 'user.login', 'user.auth_mode_id', 'user.access_profile_id', 'user.create_date', 'user.last_update', 'user.ldap_cn'))
                 ->order('user.name asc');
@@ -207,21 +209,25 @@ class Api_UsersController extends Zend_Rest_Controller {
     }
 
     public function indexAction() {
+        set_time_limit(0);
         try {
-
             IMDT_Util_ReportFilterHandler::parseThisFilters($this->select, $this->filters);
             IMDT_Util_ReportFilterHandler::parseThisQueries($this->select, $this->filters);
 
             if ($groupId = $this->_request->getParam('user_group')) {
                 $this->select->where('user_group.group_id = ?', $groupId);
             }
-
+            //echo $this->select;
             $collection = $this->model->fetchAll($this->select);
             $rCollection = ($collection != null ? $collection->toArray() : array());
 
             array_walk($rCollection, array($this, 'rowHandler'));
 
-            $this->view->response = array('success' => '1', 'collection' => $rCollection, 'msg' => sprintf($this->_helper->translate('%s users retrieved successfully.'), count($rCollection)));
+            //$rCollection = array_slice($rCollection, 0 , 5);
+
+            $this->view->response = array('success' => '1',
+                'collection' => $rCollection,//array('huull'),//array_slice($rCollection, 0, 100),
+                'msg' => sprintf($this->_helper->translate('%s users retrieved successfully.'), count($rCollection)));
         } catch (Exception $e) {
             $this->view->response = array('success' => '0', 'msg' => $e->getMessage());
         }

@@ -66,61 +66,28 @@ class IMDT_Service_Auth {
             throw new Exception(IMDT_Util_Translate::_('Successful authentication, but invalid user id') . '.');
         }
 
-
-        if ($authData['auth_mode'] == BBBManager_Config_Defines::$LDAP_AUTH_MODE) {
-            BBBManager_Cache_GroupSync::getInstance()->getData();
-        }
-
-        BBBManager_Cache_GroupHierarchy::getInstance()->getData();
-        BBBManager_Cache_GroupsAccessProfile::getInstance()->getData();
-
-
         $userGroupModel = new BBBManager_Model_UserGroup();
         $userGroups = $userGroupModel->findByUserId($userId);
         $authData['userGroups'] = ($userGroups != null ? $userGroups->toArray() : array());
 
-        $allGroups = array();
+//        $groupsModel = new BBBManager_Model_Group();
+//        $allGroupsWithHierarchy = $groupsModel->getGroupHierarchy();
 
-        foreach ($authData['userGroups'] as $group) {
-            if (!isset($allGroups[$group['group_id']])) {
-                $allGroups[$group['group_id']] = $group;
-            }
-        }
+//        Zend_Debug::dump($allGroupsWithHierarchy); die;
+//        $allGroupsWithHierarchy = array();
+//        $groupHierarchy = BBBManager_Cache_GroupHierarchy::getInstance()->getData();
+//        foreach ($allGroups as $groupId => $group) {
+//            $allGroupsWithHierarchy[$groupId] = $group;
+//            if (isset($groupHierarchy[$groupId]) && isset($groupHierarchy[$groupId]['parents'])) {
+//                foreach ($groupHierarchy[$groupId]['parents'] as $parentGroup) {
+//                    $allGroupsWithHierarchy[$parentGroup['group_id']] = $parentGroup;
+//                }
+//            }
+//        }
+//        $authData['groups'] = $allGroupsWithHierarchy;
+//        $authData['groupIds'] = array_keys($allGroupsWithHierarchy);
 
-        if (isset($authData['localGroupsFromLdapGroups'])) {
-            foreach ($authData['localGroupsFromLdapGroups'] as $group) {
-                if (!isset($allGroups[$group['group_id']])) {
-                    $allGroups[$group['group_id']] = $group;
-                }
-            }
-        }
-
-        if (isset($authData['ldapGroupsInDatabase'])) {
-            foreach ($authData['ldapGroupsInDatabase'] as $group) {
-                if (!isset($allGroups[$group['group_id']])) {
-                    $allGroups[$group['group_id']] = $group;
-                }
-            }
-        }
-
-        $allGroupsWithHierarchy = array();
-        $groupHierarchy = BBBManager_Cache_GroupHierarchy::getInstance()->getData();
-
-        foreach ($allGroups as $groupId => $group) {
-            $allGroupsWithHierarchy[$groupId] = $group;
-
-            if (isset($groupHierarchy[$groupId]) && isset($groupHierarchy[$groupId]['parents'])) {
-                foreach ($groupHierarchy[$groupId]['parents'] as $parentGroup) {
-                    $allGroupsWithHierarchy[$parentGroup['group_id']] = $parentGroup;
-                }
-            }
-        }
-
-        $authData['groups'] = $allGroupsWithHierarchy;
-        $authData['groupIds'] = array_keys($allGroupsWithHierarchy);
-
-        IMDT_Util_AccessProfile::generate($authData);
-
+        $authData['user_access_profile'] = $authData['access_profile_id'];
         $authData['token'] = session_id();
 
         $this->_authResult->setAuthData($authData);
