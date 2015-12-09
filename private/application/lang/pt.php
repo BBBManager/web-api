@@ -1,6 +1,7 @@
 <?php
 
 return array(
+    'No Access' => 'Sem Acesso',
     'User logged in but no access profile detected.' => 'Login realizado, mas não foi detectado um perfil de acesso.',
     'dateFormat' => 'dd/mm/yyyy',
     'dateFormat-datepicker' => 'dd/MM/yyyy',
