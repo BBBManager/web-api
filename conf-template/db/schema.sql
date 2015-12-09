@@ -547,9 +547,10 @@ BEGIN
     
     update `user` dest 
     join (
-        select user_id, min(access_profile_id) access_profile_id from proc_user_groups pug inner join `group` g on pug.group_id = g.group_id
-        where access_profile_id is not null
-        group by user_id
+            select u.user_id, case when min(g.access_profile_id)  = 5 then null else min(g.access_profile_id) end access_profile_id from 
+            user u left join proc_user_groups pug on pug.user_id = u.user_id
+            left join `group` g on pug.group_id = g.group_id
+            group by u.user_id
     ) uap on uap.user_id = dest.user_id
     set dest.access_profile_id = uap.access_profile_id
     where 
@@ -557,9 +558,11 @@ BEGIN
         (dest.access_profile_id <> uap.access_profile_id)
         or (dest.access_profile_id is null and uap.access_profile_id is not null)
         or (dest.access_profile_id is not null and uap.access_profile_id is null)
-    );
+    ) and auth_mode_id <> 3;
 
-    update `group` set visible = true where name in ('BBBMANAGER_USER', 'BBBMANAGER_ADM' ) ;
+    update `user` set access_profile_id = 4 where auth_mode_id = 3;
+
+    update `group` set visible = true where name in ('WEBCONF_USER', 'WEBCONF_ADM' ) ;
 
 END$$
 DELIMITER ;
