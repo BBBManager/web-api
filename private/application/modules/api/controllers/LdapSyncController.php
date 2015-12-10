@@ -433,7 +433,7 @@ class Api_LdapSyncController extends Zend_Rest_Controller {
                 }
                 echo 'Inserted relations:' . $insertedRelationsCount . '<br/>';
             }
-            
+            BBBManager_Util_AccessProfileChanges::getInstance()->mustChange();
         } catch (Exception $ex) {
             echo 'Erro: ' . $ex->getMessage();
             die();
