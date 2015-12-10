@@ -1,6 +1,0 @@
-sep=,
-user_id,name,email,login,auth_mode_id,access_profile_id,access_profile,groups,valid_from,valid_to
-1,Administrator,tiago@imdt.com.br,ADMIN,1,1,"System Administrator",1,,
-3,Oswaldo,oswaldoa@imdt.com.br,oswaldoa,1,4,"System User",,2015-12-03,2019-07-10
-4,"Rafael Feiten",rafaelf@imdt.com.br,bbb_rafaelf,1,4,"System User",,,
-2,"Tiago Jacobs",tiago.jacobs@gmail.com,tiago,1,4,"System User",,,

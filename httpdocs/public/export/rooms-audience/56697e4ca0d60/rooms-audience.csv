@@ -1,4 +1,0 @@
-sep=,
-auth_mode,user_id,login,name,online_time,ip_address,date_join,date_left
-Local,1,ADMIN,Administrator,25min:1s,10.30.10.99,"12/03/2015 09:53:47","12/03/2015 10:18:48"
-Local,2,bbb_tiago,"Tiago Jacobs",25min:58s,"10.30.10.99, 10.30.10.99","12/03/2015 09:53:19, 12/03/2015 09:54:28","12/03/2015 09:54:25, 12/03/2015 10:19:20"

@@ -1,7 +1,0 @@
-sep=,
-meeting_room_id,name,date_start,date_end,timezone,encrypted,privacy_policy,url,participants_limit,record,group_admin_local,group_admin_ldap,group_moderator_local,group_moderator_ldap,group_presenter_local,group_presenter_ldap,group_attendee_local,group_attendee_ldap,user_admin_local,user_admin_ldap,user_moderator_local,user_moderator_ldap,user_presenter_local,user_presenter_ldap,user_attendee_local,user_attendee_ldap,meeting_mute_on_start,meeting_lock_on_start,lock_disable_mic_for_locked_users,lock_disable_cam_for_locked_users,lock_disable_public_chat_for_locked_users,lock_disable_private_chat_for_locked_users,lock_layout_for_locked_users
-5,"Copy of Copy of Sala de teste","2015-11-30 17:21:00","2015-12-31 21:12:00",-3,0,1,publica3,5,0,,,,,,,,,1,,,,,,,,1,1,1,1,1,1,1
-4,"Copy of Sala de teste","2015-11-30 17:21:00","2015-12-31 21:12:00",-3,0,1,publica2,5,0,,,,,,,,,1,,,,,,,,1,1,1,1,1,1,1
-1,"Sala de teste","2015-12-03 10:22:00","2015-12-31 21:12:00",-3,0,1,publica,2,0,,,,,,,,,1,,,,,,,,1,1,1,1,1,1,1
-2,"Sala teste com categoria","2015-12-01 15:56:00","2015-12-31 15:56:00",-3,0,3,565ddf4952f21,12,1,,,,,,,,,"1,2,3",,,,,,,,1,1,1,1,0,1,0
-3,"Sala teste com categoria 2","2015-12-30 15:58:00","2015-12-30 18:58:00",-3,0,1,565ddfb0cbe91,12,0,,,,,,,,,1,,,,,,,,1,0,1,1,0,1,0
