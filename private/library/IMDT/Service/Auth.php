@@ -70,23 +70,6 @@ class IMDT_Service_Auth {
         $userGroups = $userGroupModel->findEffectiveByUserId($userId);
         $authData['userGroups'] = ($userGroups != null ? $userGroups->toArray() : array());
 
-//        $groupsModel = new BBBManager_Model_Group();
-//        $allGroupsWithHierarchy = $groupsModel->getGroupHierarchy();
-
-//        Zend_Debug::dump($allGroupsWithHierarchy); die;
-//        $allGroupsWithHierarchy = array();
-//        $groupHierarchy = BBBManager_Cache_GroupHierarchy::getInstance()->getData();
-//        foreach ($allGroups as $groupId => $group) {
-//            $allGroupsWithHierarchy[$groupId] = $group;
-//            if (isset($groupHierarchy[$groupId]) && isset($groupHierarchy[$groupId]['parents'])) {
-//                foreach ($groupHierarchy[$groupId]['parents'] as $parentGroup) {
-//                    $allGroupsWithHierarchy[$parentGroup['group_id']] = $parentGroup;
-//                }
-//            }
-//        }
-//        $authData['groups'] = $allGroupsWithHierarchy;
-//        $authData['groupIds'] = array_keys($allGroupsWithHierarchy);
-
         $authData['user_access_profile'] = $authData['access_profile_id'];
         $authData['token'] = session_id();
 

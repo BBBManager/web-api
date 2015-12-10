@@ -72,6 +72,10 @@ class IMDT_Service_Auth_Adapter_Local {
 
             $authResult->setAuthData($userInfo);
         }
+        
+        if($authResult->getAuthData()['access_profile_id'] == null) {
+            throw new Exception(IMDT_Util_Translate::_('User logged in but no access profile detected.'));
+        }
 
         return $authResult;
     }
