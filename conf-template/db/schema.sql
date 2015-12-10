@@ -481,7 +481,7 @@ CREATE TABLE `user_group` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
---Version 2
+/*Version 2*/
 create table proc_user_groups (
     user_id integer not null ,
     group_id integer not null ,
