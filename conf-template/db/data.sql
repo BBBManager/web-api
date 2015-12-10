@@ -6,6 +6,7 @@ INSERT INTO access_profile (access_profile_id, name, create_date) values ( 1, 'A
 INSERT INTO access_profile (access_profile_id, name, create_date) values ( 2, 'Support', SYSDATE());
 INSERT INTO access_profile (access_profile_id, name, create_date) values ( 3, 'Privileged User', SYSDATE());
 INSERT INTO access_profile (access_profile_id, name, create_date) values ( 4, 'System User', SYSDATE());
+INSERT INTO access_profile (access_profile_id, name, create_date) values ( 5, 'Inherited from group', SYSDATE());
 
 insert into meeting_room_action (meeting_room_action_id, name) values(1,'Join meeting room');
 insert into meeting_room_action (meeting_room_action_id, name) values(2,'Left meeting room');
