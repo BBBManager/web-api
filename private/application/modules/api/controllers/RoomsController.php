@@ -70,7 +70,7 @@ class Api_RoomsController extends Zend_Rest_Controller {
                 ->joinLeft(
                         array(
                     'recordings' => new Zend_Db_Expr(
-                            '( 
+                            '(
                                                             select
                                                                 meeting_room.meeting_room_id,
                                                                 count(record.record_id) > 0 as has_recordings
@@ -184,6 +184,13 @@ class Api_RoomsController extends Zend_Rest_Controller {
         $this->filters['user_attendee_auth_mode'] = array('column' => 'user.auth_mode_id', 'type' => 'exists_key', 'select' => $select);
         $this->filters['user_attendee_login'] = array('column' => 'user.login', 'type' => 'exists_text', 'select' => $select);
         $this->filters['user_attendee_name'] = array('column' => 'user.name', 'type' => 'exists_text', 'select' => $select);
+
+        $this->filters['main_date_start'] = array(
+            'column' => 'date_start',
+            'column_until' => 'date_end',
+            'type' => 'datetime',
+            'select' => $select);
+
 
         /*
           Filtros a utilizar:
@@ -324,7 +331,7 @@ class Api_RoomsController extends Zend_Rest_Controller {
 
             IMDT_Util_ReportFilterHandler::parseThisFilters($this->select, $this->filters);
             IMDT_Util_ReportFilterHandler::parseThisQueries($this->select, $this->filters);
-
+            //debug($this->filters);
             //echo $this->select;die;
             //file_put_contents('log_sql.txt', $this->select);
             $collection = $this->model->fetchAll($this->select);

@@ -134,6 +134,8 @@ class IMDT_Util_ReportFilterHandler {
         $query = $request->getParam('q', array());
         $musthave = $request->getParam('musthave', 'all');
 
+        //debug($query, false);
+
         $arrWhereGroups = array();
 
         $db = Zend_Db_Table_Abstract::getDefaultAdapter();
@@ -304,8 +306,13 @@ class IMDT_Util_ReportFilterHandler {
                         $arrWhereGroups[] = $db->quoteInto($curr['column'] . ' <= TIMESTAMP(?)', $strDatetime);
                     } elseif ($condition == 'b') {
                         $strDatetime2 = IMDT_Util_Date::filterDatetimeToApi($until);
+
                         if (strlen($strDatetime2) > 0) {
-                            $arrWhereGroups[] = $db->quoteInto($curr['column'] . ' between TIMESTAMP(\'' . $strDatetime . '\') and DATE_ADD(TIMESTAMP(\'' . $strDatetime2 . '\'), INTERVAL 59 SECOND)', null);
+                            if(isset($curr['column_until'])){ //one more magic, one less logic Kappa
+                                $arrWhereGroups[] = $db->quoteInto($curr['column'] . ' >= TIMESTAMP(\'' . $strDatetime . '\') and '.$curr['column_until'].' <= DATE_ADD(TIMESTAMP(\'' . $strDatetime2 . '\'), INTERVAL 59 SECOND)', null);
+                            } else {
+                                $arrWhereGroups[] = $db->quoteInto($curr['column'] . ' between TIMESTAMP(\'' . $strDatetime . '\') and DATE_ADD(TIMESTAMP(\'' . $strDatetime2 . '\'), INTERVAL 59 SECOND)', null);
+                            }
                         } else {
                             $arrWhereGroups[] = $db->quoteInto($curr['column'] . ' >= TIMESTAMP(?)', $strDatetime);
                         }
@@ -333,6 +340,8 @@ class IMDT_Util_ReportFilterHandler {
                      * */
                 }
             }
+
+            //debug($arrWhereGroups);
 
             if (count($arrWhereGroups) > 0) {
                 if ($musthave == 'one') {

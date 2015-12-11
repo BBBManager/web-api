@@ -57,7 +57,7 @@ class Api_AccessLogsController extends Zend_Rest_Controller {
     }
 
     public function rowHandler(&$row) {
-        //$row['meeting_room_action_name'] = IMDT_Util_Translate::_($row['meeting_room_action_name']);
+        $row['description'] = IMDT_Util_Translate::_($row['description']);
     }
 
     public function getAction() {
