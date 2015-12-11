@@ -565,7 +565,7 @@ BEGIN
     update `group` set visible = true where name in ('WEBCONF_USER', 'WEBCONF_ADM' ) ;
 
 END$$
-DELIMITER ;
+DELIMITER ;;
 
 
 alter table `group` alter column access_profile_id set default 5 ;
