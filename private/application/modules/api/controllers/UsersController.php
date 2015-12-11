@@ -129,6 +129,10 @@ class Api_UsersController extends Zend_Rest_Controller {
             $row['_removable'] = '0';
         }
 
+        if($row['auth_mode_id'] == BBBManager_Config_Defines::$LDAP_AUTH_MODE) {
+            $row['_removable'] = '0';
+        }
+
         /* $row['_editable'] = '1';
           $row['_removable'] = '1'; */
     }
