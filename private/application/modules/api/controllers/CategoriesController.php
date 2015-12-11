@@ -29,7 +29,25 @@ class Api_CategoriesController extends Zend_Rest_Controller {
     }
 
     public function acessLog() {
-        
+        $old = null;
+        $new = null;
+        $desc = '';
+        if ($this->_getParam('id', false)) {
+            $this->getAction();
+            if ($this->view->response['success'] == '1') {
+                if (in_array($this->getRequest()->getActionName(), array('delete', 'put'))) {
+                    $old = $this->view->response['row'];
+                }
+                $desc = $this->view->response['row']['name'] . ' (' . $this->view->response['row']['meeting_room_category_id'] . ')';
+            }
+            $this->view->response = null;
+        }
+
+        if (in_array($this->getRequest()->getActionName(), array('post', 'put'))) {
+            $new = $this->_helper->params();
+        }
+
+        IMDT_Util_Log::write($desc, $new, $old);
     }
 
     public function deleteAction() {
