@@ -481,7 +481,7 @@ CREATE TABLE `user_group` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
---Version 2
+/*Version 2*/
 create table proc_user_groups (
     user_id integer not null ,
     group_id integer not null ,
@@ -565,10 +565,8 @@ BEGIN
     update `group` set visible = true where name in ('WEBCONF_USER', 'WEBCONF_ADM' ) ;
 
 END$$
-DELIMITER ;
+DELIMITER ;;
 
-
-insert into access_profile (access_profile_id, name) values(5, 'Inherited from group');
 
 alter table `group` alter column access_profile_id set default 5 ;
 alter table `group` change access_profile_id access_profile_id  integer not null;

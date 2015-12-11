@@ -20,7 +20,10 @@ class IMDT_Util_Log {
 
         $clientIpAddress = (($request->getHeader('clientIpAddress') != false) ? $request->getHeader('clientIpAddress') : $_SERVER['REMOTE_ADDR']);
 
-
+        //Dont log internal maintenance mode check calls
+        if ($request->getControllerName() == 'maintenance' && $request->getActionName() == 'get') {
+            return;
+        }
 
         $logModel->insert(array(
             'user_id' => (IMDT_Util_Auth::getInstance()->get('id') != null ? IMDT_Util_Auth::getInstance()->get('id') : $userId),

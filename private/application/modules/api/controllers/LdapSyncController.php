@@ -73,10 +73,10 @@ class Api_LdapSyncController extends Zend_Rest_Controller {
             $dbGroupList = $this->getLdapGroupsFromDb();
 
             echo 'Summary:<br/>';
-            echo 'LDAP user count:' . count($ldapUserList) . '<br/>';
-            echo 'LDAP group count:' . count($ldapGroupList) . '<br/>';
-            echo 'DB user count:' . count($dbUserList) . '<br/>';
-            echo 'DB group count:' . count($dbGroupList) . '<br/>';
+            echo 'LDAP user count:' . count($ldapUserList) . '<br/>' . "\n";
+            echo 'LDAP group count:' . count($ldapGroupList) . '<br/>' . "\n";
+            echo 'DB user count:' . count($dbUserList) . '<br/>' . "\n";
+            echo 'DB group count:' . count($dbGroupList) . '<br/>' . "\n";
 
             echo '<hr/>';
             $groupModel = new BBBManager_Model_Group();
@@ -95,7 +95,7 @@ class Api_LdapSyncController extends Zend_Rest_Controller {
                 foreach (array_diff_key($dbGroupList, $ldapGroupList) as $groupToDelete) {
                     $groupsToDelete[] = $groupToDelete['group_id'];
                 }
-                echo 'Groups to delete:' . count($groupsToDelete) . '<br/>';
+                echo 'Groups to delete:' . count($groupsToDelete) . '<br/>' . "\n";
 
                 if (count($groupsToDelete) > 0) {
                     $groupModel->delete('group_id in (' . join($groupsToDelete, ',') . ')');
@@ -105,7 +105,7 @@ class Api_LdapSyncController extends Zend_Rest_Controller {
             if (true) {
                 $groupsToInsert = array_diff_key($ldapGroupList, $dbGroupList);
 
-                echo 'Groups to insert:' . count($groupsToInsert) . '<br/>';
+                echo 'Groups to insert:' . count($groupsToInsert) . '<br/>' . "\n";
 
                 foreach ($groupsToInsert as $groupToInsert) {
                     $rInsertData = array(
@@ -121,7 +121,7 @@ class Api_LdapSyncController extends Zend_Rest_Controller {
             if (true) {
                 $groupKeysToCompare = array_keys(array_intersect_key($ldapGroupList, $dbGroupList));
 
-                echo 'Groups to compare:' . count($groupKeysToCompare) . '<br/>';
+                echo 'Groups to compare:' . count($groupKeysToCompare) . '<br/>' . "\n";
 
                 $updatedGroupsCount = 0;
 
@@ -143,7 +143,7 @@ class Api_LdapSyncController extends Zend_Rest_Controller {
                     }
                 }
 
-                echo 'Updated groups:' . $updatedGroupsCount . '<br/>';
+                echo 'Updated groups:' . $updatedGroupsCount . '<br/>' . "\n";
             }
             //Update relations between groups
             if (true) {
@@ -212,7 +212,7 @@ class Api_LdapSyncController extends Zend_Rest_Controller {
                     }
                 }
                 
-                echo 'Removed relations:' . $deletedRelationsCount . '<br/>';
+                echo 'Removed relations:' . $deletedRelationsCount . '<br/>' . "\n";
                 
                 //Create relations that exists in LDAP and does not exists in DB
                 $insertedRelationsCount = 0;
@@ -232,7 +232,7 @@ class Api_LdapSyncController extends Zend_Rest_Controller {
                         $insertedRelationsCount++;
                     }
                 }
-                echo 'Inserted relations:' . $insertedRelationsCount . '<br/>';
+                echo 'Inserted relations:' . $insertedRelationsCount . '<br/>' . "\n";
             }
             
             //User sync code (not refactored)
@@ -247,11 +247,11 @@ class Api_LdapSyncController extends Zend_Rest_Controller {
                 }
 
                 $rDeletes = array_diff_key($dbUserList, $ldapIndexedByLogin);
-                echo 'Users to delete:' . count($rDeletes) . '<br/>';
+                echo 'Users to delete:' . count($rDeletes) . '<br/>' . "\n";
                 $rInserts = array_diff_key($ldapIndexedByLogin, $dbUserList);
-                echo 'Users to insert:' . count($rInserts) . '<br/>';
+                echo 'Users to insert:' . count($rInserts) . '<br/>' . "\n";
                 $rUpdates = array_intersect_key($dbUserList, $ldapIndexedByLogin);
-                echo 'Users to compare:' . count($rUpdates) . '<br/>';
+                echo 'Users to compare:' . count($rUpdates) . '<br/>' . "\n";
                 
                 $rMustUpdate = array();
 
@@ -333,11 +333,11 @@ class Api_LdapSyncController extends Zend_Rest_Controller {
             }
             $adapter->commit();
 
-            echo 'Users inactivated: ' . count($rDeletes) . '' . '<br/>';
+            echo 'Users inactivated: ' . count($rDeletes) . '' . '<br/>' . "\n";
             echo "\n";
-            echo 'Users updated: ' . count($rMustUpdate) . '<br/>';
+            echo 'Users updated: ' . count($rMustUpdate) . '<br/>' . "\n";
             echo "\n";
-            echo 'Users inserted: ' . count($rInserts) . '<br/>';
+            echo 'Users inserted: ' . count($rInserts) . '<br/>' . "\n";
             
             
             
@@ -411,7 +411,7 @@ class Api_LdapSyncController extends Zend_Rest_Controller {
                     }
                 }
                 
-                echo 'Removed relations:' . $deletedRelationsCount . '<br/>';
+                echo 'Removed relations:' . $deletedRelationsCount . '<br/>' . "\n";
                 
                 //Create relations that exists in LDAP and does not exists in DB
                 $insertedRelationsCount = 0;
@@ -431,7 +431,7 @@ class Api_LdapSyncController extends Zend_Rest_Controller {
                         $insertedRelationsCount++;
                     }
                 }
-                echo 'Inserted relations:' . $insertedRelationsCount . '<br/>';
+                echo 'Inserted relations:' . $insertedRelationsCount . '<br/>' . "\n";
             }
             BBBManager_Util_AccessProfileChanges::getInstance()->mustChange();
         } catch (Exception $ex) {
