@@ -1,6 +1,11 @@
 <?php
 
 return array(
+    'Categories edit record' => 'Atualização de categoria',
+    'Categories removal' => 'Exclusão de categoria',
+    'Categories details' => 'Visualização de categoria',
+    'Categories list' => 'Listagem de categoria',
+    'Categories new record' => 'Criação de categoria',
     'Log description removal' => 'Descrição de Logs - Exclusão',
     'Log description details' => 'Descrição de Logs - Detalhes',
     'Logs description list' => 'Descrição de Logs - Listagem',

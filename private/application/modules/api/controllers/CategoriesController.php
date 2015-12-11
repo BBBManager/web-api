@@ -26,6 +26,7 @@ class Api_CategoriesController extends Zend_Rest_Controller {
         );
 
         $this->columnValidators['name'] = array(new Zend_Validate_NotEmpty());
+        $this->acessLog();
     }
 
     public function acessLog() {

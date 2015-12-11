@@ -77,6 +77,11 @@ INSERT INTO access_log_description (controller, action, description) VALUES ('us
 INSERT INTO access_log_description (controller, action, description) VALUES ('users','post','User new record');
 INSERT INTO access_log_description (controller, action, description) VALUES ('users','put','User edit record');
 INSERT INTO access_log_description (controller, action, description) VALUES ('users-reset-password','index','User password generation');
+INSERT INTO access_log_description (controller, action, description) VALUES ('categories','delete','Categories removal');
+INSERT INTO access_log_description (controller, action, description) VALUES ('categories','get','Categories details');
+INSERT INTO access_log_description (controller, action, description) VALUES ('categories','index','Categories list');
+INSERT INTO access_log_description (controller, action, description) VALUES ('categories','post','Categories new record');
+INSERT INTO access_log_description (controller, action, description) VALUES ('categories','put','Categories edit record');
 
 INSERT INTO invite_template (invite_template_id, name, subject, body, create_date) VALUES (1, 'Default invite', 'Meeting room invitation', '<p>Hi,</p><p>You have been invited to join the room __NOME_SALA__ on the following URL: __URL_SALA__ , presented by&nbsp;__PALESTRANTE_SALA__. The event starts at __INICIO_SALA__ and ends at __FIM_SALA__.</p>', SYSDATE());
 
