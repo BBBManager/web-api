@@ -128,7 +128,7 @@ class Api_RoomsController extends Zend_Rest_Controller {
                 'exclude' => $optUkExclude
         )));
 
-        $this->filters['name'] = array('column' => 'name', 'type' => 'text');
+        $this->filters['name'] = array('column' => 'mr.name', 'type' => 'text');
         $this->filters['date_start'] = array('column' => 'date_start', 'type' => 'datetime');
         $this->filters['date_end'] = array('column' => 'date_end', 'type' => 'datetime');
         $this->filters['timezone'] = array('column' => 'timezone', 'type' => 'integer');
@@ -137,7 +137,7 @@ class Api_RoomsController extends Zend_Rest_Controller {
         $this->filters['participants_limit'] = array('column' => 'participants_limit', 'type' => 'integer');
         $this->filters['recordings_count'] = array('column' => 'recordings_count', 'type' => 'integer');
         $this->filters['has_recordings'] = array('column' => 'has_recordings', 'type' => 'boolean');
-        $this->filters['meeting_room_category_id'] = array('column' => 'meeting_room_category_id', 'type' => 'integer');
+        $this->filters['meeting_room_category_id'] = array('column' => 'mr.meeting_room_category_id', 'type' => 'integer');
 
         $this->filters['encrypted'] = array('column' => 'encrypted', 'type' => 'boolean');
         $this->filters['record'] = array('column' => 'record', 'type' => 'boolean');
