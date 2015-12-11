@@ -85,14 +85,14 @@ class BBBManager_Model_User extends Zend_Db_Table_Abstract {
         return $this->fetchAll($select);
     }
 
-    public function sendNewPassword($user) {
+    public function sendNewPassword($user, $title = 'Forgot my password') {
         try {
             $newPassword = IMDT_Util_Password::generate();
 
             $view = new Zend_View();
             $view->setScriptPath(APPLICATION_PATH);
 
-            $view->title = 'Esqueci minha senha';
+            $view->title = $view->translate($title);
 
             $emailPrepend = $view->render('views/scripts/layout/email-start.phtml');
             $emailAppend = $view->render('views/scripts/layout/email-end.phtml');
@@ -127,8 +127,7 @@ class BBBManager_Model_User extends Zend_Db_Table_Abstract {
 
             $mail = new Zend_Mail('utf-8');
             $mail->addTo($user->email)
-                    ->addBcc('diogo@imdt.com.br')
-                    ->setSubject($defaultSubjectName . ' - ' . $view->translate('New Password'))
+                    ->setSubject($defaultSubjectName . ' - ' . $view->translate($title))
                     ->setBodyHtml($emailPrepend . $emailBody . $emailAppend);
             $this->update(array('password' => IMDT_Util_Hash::generate($newPassword)), $this->getAdapter()->quoteInto('user_id = ?', $user->user_id));
 

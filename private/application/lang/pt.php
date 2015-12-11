@@ -1,6 +1,8 @@
 <?php
 
 return array(
+    'Forgot my password' => 'Esqueci minha senha',
+    'Welcome to the system' => 'Bem-vindo ao sistema',
     'Must be less than the ' => 'Deve ser menor que ',
     'No Access' => 'Sem Acesso',
     'User logged in but no access profile detected.' => 'Login realizado, mas não foi detectado um perfil de acesso.',

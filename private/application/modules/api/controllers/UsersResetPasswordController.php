@@ -36,6 +36,7 @@ class Api_UsersResetPasswordController extends Zend_Rest_Controller {
         $email = $this->_getParam('email', null);
         $userId = $this->_getParam('user_id', null);
 
+
         if ($userId != null) {
             $user = $this->_model->find($userId);
 
@@ -48,7 +49,7 @@ class Api_UsersResetPasswordController extends Zend_Rest_Controller {
                 } elseif ($user->auth_mode_id == BBBManager_Config_Defines::$PERSONA_AUTH_MODE) {
                     $this->view->response = array('success' => '0', 'msg' => $this->_helper->translate('This is a Persona user.'));
                 } else {
-                    $emailSentsuccessfully = $this->_model->sendNewPassword($user);
+                    $emailSentsuccessfully = $this->_model->sendNewPassword($user, 'Welcome to the system');
 
                     if ($emailSentsuccessfully == true) {
                         $this->view->response = array('success' => '1', 'msg' => $this->_helper->translate('We have send you an email with your new password') . '.');
