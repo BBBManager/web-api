@@ -309,7 +309,9 @@ class IMDT_Util_ReportFilterHandler {
 
                         if (strlen($strDatetime2) > 0) {
                             if(isset($curr['column_until'])){ //one more magic, one less logic Kappa
-                                $arrWhereGroups[] = $db->quoteInto($curr['column'] . ' >= TIMESTAMP(\'' . $strDatetime . '\') and '.$curr['column_until'].' <= DATE_ADD(TIMESTAMP(\'' . $strDatetime2 . '\'), INTERVAL 59 SECOND)', null);
+                                $arrWhereGroups[] = $db->quoteInto(
+                                    '('.$curr['column'].' <= DATE_ADD(TIMESTAMP(\'' . $strDatetime2 . '\'), INTERVAL 59 SECOND) ) and ('.$curr['column_until'].' >= TIMESTAMP(\'' . $strDatetime . '\') )'
+                                    , null);
                             } else {
                                 $arrWhereGroups[] = $db->quoteInto($curr['column'] . ' between TIMESTAMP(\'' . $strDatetime . '\') and DATE_ADD(TIMESTAMP(\'' . $strDatetime2 . '\'), INTERVAL 59 SECOND)', null);
                             }
