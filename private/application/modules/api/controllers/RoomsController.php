@@ -423,8 +423,10 @@ class Api_RoomsController extends Zend_Rest_Controller {
             }
         }
 
-        if(strtotime($data['date_start']) >= strtotime($data['date_end'])) {
-            $arrErrorMessages[] = $this->_helper->translate('column-meeting_room-date_start') . ': '.$this->_helper->translate('Must be less than the ') .$this->_helper->translate('column-meeting_room-date_end') ;
+        if(isset($data['date_start'])) {
+            if (strtotime($data['date_start']) >= strtotime($data['date_end'])) {
+                $arrErrorMessages[] = $this->_helper->translate('column-meeting_room-date_start') . ': ' . $this->_helper->translate('Must be less than the ') . $this->_helper->translate('column-meeting_room-date_end');
+            }
         }
 
         return $arrErrorMessages;

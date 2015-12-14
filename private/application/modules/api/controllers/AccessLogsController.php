@@ -57,7 +57,7 @@ class Api_AccessLogsController extends Zend_Rest_Controller {
     }
 
     public function rowHandler(&$row) {
-        $row['description'] = IMDT_Util_Translate::_($row['description']);
+        @$row['description'] = IMDT_Util_Translate::_($row['description']);
     }
 
     public function getAction() {

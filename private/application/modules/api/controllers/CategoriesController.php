@@ -26,14 +26,14 @@ class Api_CategoriesController extends Zend_Rest_Controller {
         );
 
         $this->columnValidators['name'] = array(new Zend_Validate_NotEmpty());
-        //$this->acessLog();
+        $this->acessLog();
     }
 
     public function acessLog() {
         $old = null;
         $new = null;
         $desc = '';
-        if ($this->_getParam('id', false)) {
+        if ($this->_getParam('id', false) && isset($this->view->response['row'])) {
             $this->getAction();
             if ($this->view->response['success'] == '1') {
                 if (in_array($this->getRequest()->getActionName(), array('delete', 'put'))) {

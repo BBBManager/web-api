@@ -18,11 +18,11 @@ class Api_UsersController extends Zend_Rest_Controller {
                 ->from('user', array('user_id', 'name', 'email', 'login', 'auth_mode_id', 'access_profile_id', 'observations', 'create_date', 'last_update', 'ldap_cn',
                     'valid_from', 'valid_to',
                     'actived' => new Zend_Db_Expr('IF((valid_from <= current_date or valid_from is null) and (valid_to >= current_date or valid_to is null),true, false)')))
-                ->joinLeft(array('ug_local' => 'user_group'), 'ug_local.user_id = user.user_id', null)
+                ->joinLeft(array('ug_local' => 'proc_user_groups'), 'ug_local.user_id = user.user_id', null)
                 ->joinLeft(array('g_local' => 'group'), 'g_local.group_id = ug_local.group_id AND g_local.auth_mode_id = '.BBBManager_Config_Defines::$LOCAL_AUTH_MODE, array(
                     'groups' => new Zend_Db_Expr('GROUP_CONCAT(distinct g_local.group_id SEPARATOR ",")')
                 ))
-                ->joinLeft(array('ug_ldap' => 'user_group'), 'ug_ldap.user_id = user.user_id', null)
+                ->joinLeft(array('ug_ldap' => 'proc_user_groups'), 'ug_ldap.user_id = user.user_id', null)
                 ->joinLeft(array('g_ldap' => 'group'), 'g_ldap.group_id = ug_ldap.group_id AND g_ldap.auth_mode_id = '.BBBManager_Config_Defines::$LDAP_AUTH_MODE, array(
                     'ldapGroups' => new Zend_Db_Expr('GROUP_CONCAT(distinct g_ldap.group_id SEPARATOR ",")')
                 ))

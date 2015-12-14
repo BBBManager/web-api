@@ -51,15 +51,19 @@ class Api_GroupsController extends Zend_Rest_Controller {
         $this->select = $this->model->select()
                 ->setIntegrityCheck(false)
                 ->from(array('g' => 'group'), array('group_id', 'name', 'auth_mode_id', 'access_profile_id', 'observations', 'visible'))
-                ->joinLeft(array('ug' => 'proc_user_groups'), 'ug.group_id = g.group_id', array('user_attendee' => new Zend_Db_Expr('GROUP_CONCAT(distinct ug.user_id SEPARATOR ",")')))
+                ->joinLeft(array('ug' => 'user_group'), 'ug.group_id = g.group_id', array('user_attendee' => new Zend_Db_Expr('GROUP_CONCAT(distinct ug.user_id SEPARATOR ",")')))
                 //->joinLeft('user','user.user_id = user_group.user_id',array())
                 ->joinLeft('group_group', 'group_group.parent_group_id = g.group_id', array(
                     'group_attendee_local' => new Zend_Db_Expr('GROUP_CONCAT(distinct case when g.auth_mode_id = 1 then g.group_id else null end SEPARATOR ",")'),
                     'group_attendee_ldap' => new Zend_Db_Expr('GROUP_CONCAT(distinct case when g.auth_mode_id = 2 then g.group_id else null end SEPARATOR ",")')
                 ))
-                ->where('case when g.auth_mode_id = ' . BBBManager_Config_Defines::$LDAP_AUTH_MODE . ' then visible = true else 1 = 1 end')
+                //->where('case when g.auth_mode_id = ' . BBBManager_Config_Defines::$LDAP_AUTH_MODE . ' then visible = true else 1 = 1 end')
                 ->group(array('g.group_id', 'g.name', 'g.auth_mode_id', 'g.access_profile_id'))
                 ->order('g.name asc');
+
+        if($this->_getParam('auth_mode_id', false) != BBBManager_Config_Defines::$LDAP_AUTH_MODE) {
+            $this->select->where('case when g.auth_mode_id = ' . BBBManager_Config_Defines::$LDAP_AUTH_MODE . ' then visible = true else 1 = 1 end');
+        }
 
         $this->acessLog();
     }
