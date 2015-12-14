@@ -17,18 +17,18 @@ try {
 
     $bbbRootPathString = DIRECTORY_SEPARATOR . implode(DIRECTORY_SEPARATOR, array('var', 'bigbluebutton'));
     $bbbRawRecordingPathString = implode(DIRECTORY_SEPARATOR, array($bbbRootPathString, 'recording', 'raw'));
-    $bbbProcessingRecordingsPathString = implode(DIRECTORY_SEPARATOR, array($bbbRootPathString, 'recording', 'process', 'presentation'));
-    $bbbProcessedRecordingsPathString = implode(DIRECTORY_SEPARATOR, array($bbbRootPathString, 'recording', 'status', 'processed'));
+    $bbbPublishedRecordingsPathString = implode(DIRECTORY_SEPARATOR, array($bbbRootPathString, 'published', 'presentation'));
+    $bbbProcessedRecordingsPathString = implode(DIRECTORY_SEPARATOR, array($bbbRootPathString, 'recording', 'status', 'published'));
 
     $bbbRawRecordingPath = realpath($bbbRawRecordingPathString);
-    $bbbProcessingRecordingsPath = realpath($bbbProcessingRecordingsPathString);
+    $bbbProcessingRecordingsPath = realpath($bbbPublishedRecordingsPathString);
 
     if ($bbbRawRecordingPath === false) {
         throw new Exception('Invalid raw recording path ' . $bbbRawRecordingPathString);
     }
 
     if ($bbbProcessingRecordingsPath === false) {
-        throw new Exception('Invalid processing recordings path ' . $bbbProcessingRecordingsPathString);
+        throw new Exception('Invalid published recordings path ' . $bbbPublishedRecordingsPathString);
     }
 
     $dbAdapter = Zend_Db_Table::getDefaultAdapter();
@@ -51,7 +51,7 @@ try {
 
     foreach ($processingRecordingIterator as $recording) {
         $recordingId = $recording->getFilename();
-
+        
         if (isset($dbRecordings[$recordingId]) && $dbRecordings[$recordingId]['sync_done'] == '1') {
             echo 'Skipping recording ' . $recordingId . ' already synced' . PHP_EOL;
             continue;
@@ -143,7 +143,7 @@ try {
                     'date_start' => date('Y-m-d H:i:s', $javaToPhpStartTime),
                     'date_end' => date('Y-m-d H:i:s', $javaToPhpEndTime),
                     'name' => $meetingName,
-                    'playback_url' => IMDT_Util_Config::getInstance()->get('web_base_url') . '/playback/presentation/playback.html?meetingId=' . $recordingId
+                    'playback_url' => IMDT_Util_Config::getInstance()->get('web_base_url') . '/playback/presentation/0.9.0/playback.html?meetingId=' . $recordingId
                 );
 
                 if ($recordingReady) {
