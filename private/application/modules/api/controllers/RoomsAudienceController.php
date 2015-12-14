@@ -1,20 +1,24 @@
 <?php
 
-class Api_RoomsAudienceController extends Zend_Rest_Controller {
+class Api_RoomsAudienceController extends Zend_Rest_Controller
+{
 
     protected $_id;
     public $filters = array();
 
-    public function init() {
+    public function init()
+    {
         $this->_helper->viewRenderer->setNoRender(true);
         $this->_helper->layout()->disableLayout();
 
         $this->_id = $this->_getParam('id', null);
         $this->model = new BBBManager_Model_MeetingRoomLog();
+        $this->_roomsModel = new BBBManager_Model_MeetingRoom();
         $this->acessLog();
     }
 
-    public function acessLog() {
+    public function acessLog()
+    {
         $old = null;
         $new = null;
         $desc = '';
@@ -22,15 +26,40 @@ class Api_RoomsAudienceController extends Zend_Rest_Controller {
         IMDT_Util_Log::write($desc, $new, $old);
     }
 
-    public function deleteAction() {
+    public function deleteAction()
+    {
         $this->view->response = array('success' => '0', 'msg' => $this->_helper->translate('Disabled function.'));
     }
 
-    public function indexAction() {
+    public function indexAction()
+    {
         try {
             $params = $this->_request->getParams();
             $meetingRoomId = $params['meeting_room_id'];
 
+            $userAcessProfileId = IMDT_Util_Auth::getInstance()->get('access_profile_id');
+            $allowedRooms = null;
+
+            //If it's not admin or system support, only allow access to rooms managed by this user
+            //TODO move this logic to a reusable component
+            if (!in_array($userAcessProfileId, array(BBBManager_Config_Defines::$SYSTEM_ADMINISTRATOR_PROFILE, BBBManager_Config_Defines::$SYSTEM_SUPPORT_PROFILE))) {
+                $allowedRooms = array();
+                //Get rooms that user have access and use as filter
+                $myRoomsCollection = $this->_roomsModel->findMyRooms();
+                $rCollection = ($myRoomsCollection != null ? $myRoomsCollection->toArray() : array());
+                $rCollection = BBBManager_Util_MeetingRoom::detectUserProfileInMeeting($rCollection);
+
+                foreach ($rCollection as $room) {
+                    if (in_array($room['user_profile_in_meeting'], array(BBBManager_Config_Defines::$ROOM_MODERATOR_PROFILE, BBBManager_Config_Defines::$ROOM_ADMINISTRATOR_PROFILE)) != false) {
+                        $allowedRooms[] = $room['meeting_room_id'];
+                    }
+                }
+            }
+
+            //Apply filter to rooms
+            if (!in_array($meetingRoomId, $allowedRooms)) {
+                throw new Exception(sprintf($this->_helper->translate('Meeting room %s not found.'), $meetingRoomId));
+            }
 
             $modelMeetingRoom = new BBBManager_Model_MeetingRoom();
             $row = $modelMeetingRoom->find($meetingRoomId)->current();
@@ -94,19 +123,23 @@ class Api_RoomsAudienceController extends Zend_Rest_Controller {
         }
     }
 
-    public function headAction() {
+    public function headAction()
+    {
         $this->getResponse()->appendBody("From headAction()");
     }
 
-    public function getAction() {
+    public function getAction()
+    {
         $this->view->response = array('success' => '0', 'msg' => $this->_helper->translate('Disabled function.'));
     }
 
-    public function postAction() {
+    public function postAction()
+    {
         $this->view->response = array('success' => '0', 'msg' => $this->_helper->translate('Disabled function.'));
     }
 
-    public function putAction() {
+    public function putAction()
+    {
         $this->view->response = array('success' => '0', 'msg' => $this->_helper->translate('Disabled function.'));
     }
 

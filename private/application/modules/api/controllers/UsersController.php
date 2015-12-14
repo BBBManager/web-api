@@ -250,6 +250,12 @@ class Api_UsersController extends Zend_Rest_Controller {
             }
         }
 
+        if(isset($data['valid_from']) && !empty($data['valid_from'])) {
+            if (strtotime($data['valid_from']) >= strtotime($data['valid_to'])) {
+                $arrErrorMessages[] = $this->_helper->translate('column-user-valid_from') . ': ' . $this->_helper->translate('Must be less than the ') . $this->_helper->translate('column-user-valid_to');
+            }
+        }
+
         return $arrErrorMessages;
     }
 
