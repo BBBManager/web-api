@@ -350,7 +350,8 @@ class IMDT_Util_Acl {
             BBBManager_Config_Defines::$SYSTEM_ADMINISTRATOR_PROFILE => array(
                 'methods' => array(
                     'INDEX',
-                    'GET'
+                    'GET',
+                    'DELETE'
                 ),
                 'actions' => array(
                     'list',
@@ -360,7 +361,8 @@ class IMDT_Util_Acl {
             BBBManager_Config_Defines::$SYSTEM_SUPPORT_PROFILE => array(
                 'methods' => array(
                     'INDEX',
-                    'GET'
+                    'GET',
+                    'DELETE'
                 ),
                 'actions' => array(
                     'list',
@@ -370,7 +372,8 @@ class IMDT_Util_Acl {
             BBBManager_Config_Defines::$SYSTEM_PRIVILEGED_USER_PROFILE => array(
                 'methods' => array(
                     'INDEX',
-                    'GET'
+                    'GET',
+                    'DELETE'
                 ),
                 'actions' => array(
                     'list',
@@ -380,7 +383,8 @@ class IMDT_Util_Acl {
             BBBManager_Config_Defines::$SYSTEM_USER_PROFILE => array(
                 'methods' => array(
                     'INDEX',
-                    'GET'
+                    'GET',
+                    'DELETE'
                 ),
                 'actions' => array(
                     'list',
@@ -390,7 +394,8 @@ class IMDT_Util_Acl {
             BBBManager_Config_Defines::$NA_PROFILE => array(
                 'methods' => array(
                     'INDEX',
-                    'GET'
+                    'GET',
+                    'DELETE'
                 ),
                 'actions' => array(
                     'list',
