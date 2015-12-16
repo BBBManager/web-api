@@ -93,7 +93,7 @@ CREATE TABLE `group` (
   `group_id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(255) DEFAULT NULL,
   `auth_mode_id` int(11) NOT NULL,
-  `access_profile_id` int(11) NOT NULL,
+  `access_profile_id` int(11) NOT NULL default '5',
   `create_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `last_update` timestamp NULL DEFAULT NULL,
   `visible` tinyint(1) NOT NULL DEFAULT '0',
@@ -516,6 +516,9 @@ create table proc_group_recursive
     primary key (group_id, ancestry_group_id)
 );
 
+alter table `group` alter column access_profile_id set default 5 ;
+alter table `group` change access_profile_id access_profile_id  integer not null;
+
 DELIMITER $$
 CREATE PROCEDURE `update_security`()
     READS SQL DATA
@@ -565,8 +568,7 @@ BEGIN
     update `group` set visible = true where name in ('WEBCONF_USER', 'WEBCONF_ADM' ) ;
 
 END$$
-DELIMITER ;;
+DELIMITER ;
 
+select 'Finished';
 
-alter table `group` alter column access_profile_id set default 5 ;
-alter table `group` change access_profile_id access_profile_id  integer not null;
