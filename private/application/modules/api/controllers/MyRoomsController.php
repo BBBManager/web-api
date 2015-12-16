@@ -32,7 +32,48 @@ class Api_MyRoomsController extends Zend_Rest_Controller {
     }
 
     public function deleteAction() {
-        
+        try {
+            if ($this->_id == null) {
+                throw new Exception('Invalid room id');
+            }
+            $userId = sprintf('%s_%s', $this->_id, IMDT_Util_Auth::getInstance()->get('id'));
+            
+            $rBbbApiRequest = array(
+                'userId' => $userId,
+                'adminKey' => trim(file_get_contents(IMDT_Util_Config::getInstance()->get('bbbmanager_agent_keyfile')))
+            );
+
+            $bbbApiRequestQueryString = http_build_query($rBbbApiRequest);
+
+            $webBaseUrl = IMDT_Util_Config::getInstance()->get('bbbmanager_agent_baseurl');
+
+            if (substr($webBaseUrl, -1) != '/') {
+                $webBaseUrl .= '/';
+            }
+            
+            $bbbApiResponseString = @file_get_contents($webBaseUrl . 'api/kill/?' . $bbbApiRequestQueryString);
+            $bbbApiResponse = json_decode($bbbApiResponseString);
+            
+            if($bbbApiResponse == NULL) {
+                $this->view->response = array(
+                    'success' => '1',
+                    'error' => 'Request to API failed'
+                );
+            } else if(isset($bbbApiResponse->success) && $bbbApiResponse->success != '1') {
+                $this->view->response = array(
+                    'success' => '1',
+                    'error' => 'Failed to kill current session: ' . $bbbApiResponseString
+                );
+            } else if(isset($bbbApiResponse->success) && $bbbApiResponse->success == '1') {
+                $this->view->response = array(
+                    'success' => '1'
+                );
+            } else {
+                die('Situação inesperada.');
+            }
+        } catch (Exception $e) {
+            $this->view->response = array('success' => '0', 'msg' => $e->getMessage());
+        }
     }
 
     public function getAction() {
