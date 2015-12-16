@@ -334,8 +334,10 @@ class Api_UsersController extends Zend_Rest_Controller {
                                                         select ' . $this->_id . ', g.group_id 
                                                         from `group` g where g.group_id in (' . $groups . ')');
 
-                BBBManager_Util_AccessProfileChanges::getInstance()->mustChange();
+                //BBBManager_Util_AccessProfileChanges::getInstance()->mustChange();
             }
+
+            BBBManager_Util_AccessProfileChanges::getInstance()->mustChange();
 
             $this->model->getAdapter()->commit();
             $this->view->response = array('success' => '1', 'msg' => '', 'id' => $newRowId, 'msg' => $this->_helper->translate('User has been created successfully.'));
