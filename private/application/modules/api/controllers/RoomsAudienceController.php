@@ -56,8 +56,8 @@ class Api_RoomsAudienceController extends Zend_Rest_Controller
                 }
             }
 
-            //Apply filter to rooms
-            if (!in_array($meetingRoomId, $allowedRooms)) {
+            //Apply filter to rooms, only if it's not admin or support
+            if ($allowedRooms != null && !in_array($meetingRoomId, $allowedRooms)) {
                 throw new Exception(sprintf($this->_helper->translate('Meeting room %s not found.'), $meetingRoomId));
             }
 
