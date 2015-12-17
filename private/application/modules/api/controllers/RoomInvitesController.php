@@ -140,7 +140,8 @@ class Api_RoomInvitesController extends Zend_Rest_Controller {
             $collectionGroupsPresenter = $this->model->getDefaultAdapter()->fetchAll('select g.group_id, g.name
                                                         from meeting_room_group
                                                         join `group` g on g.group_id = meeting_room_group.group_id
-                                                        where meeting_room_group.meeting_room_profile_id = 3');
+                                                        where meeting_room_group.meeting_room_profile_id = 3
+                                                        and meeting_room_group.meeting_room_id = ' . $meetingRoomId);
             if (count($collectionGroupsPresenter) > 0) {
                 foreach ($collectionGroupsPresenter as $curr) {
                     $presenters[] = $curr['name'];
