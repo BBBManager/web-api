@@ -69,7 +69,7 @@ class BBBManager_Model_MeetingRoom extends Zend_Db_Table_Abstract {
     }
 
     public function findMyRooms($roomId = null, $criteria = null) {
-
+        //Public Rooms
         $publicRoomsSelect = $this->select();
         $publicRoomsSelect->from(
                 $this->_name, array(
@@ -78,9 +78,9 @@ class BBBManager_Model_MeetingRoom extends Zend_Db_Table_Abstract {
             'group_profile' => new Zend_Db_Expr(BBBManager_Config_Defines::$ROOM_ATTENDEE_PROFILE)
                 )
         );
-
         $publicRoomsSelect->where('privacy_policy = ?', BBBManager_Config_Defines::$PUBLIC_MEETING_ROOM);
 
+        //Any logged user rooms
         $loggedUsersRoomsSelect = $this->select();
         $loggedUsersRoomsSelect->from(
                 $this->_name, array(
@@ -91,40 +91,28 @@ class BBBManager_Model_MeetingRoom extends Zend_Db_Table_Abstract {
         );
         $loggedUsersRoomsSelect->where('privacy_policy = ?', BBBManager_Config_Defines::$ANY_LOGGED_USER_MEETING_ROOM);
 
-        $userHasGroup = (is_array(IMDT_Util_Auth::getInstance()->get('groupIds')) && (count(IMDT_Util_Auth::getInstance()->get('groupIds')) > 0));
-
         $onlyInvitedUsersRoomsSelect = $this->select()->setIntegrityCheck(false);
         $onlyInvitedUsersRoomsSelect->from(array('mr' => $this->_name), array('meeting_room_id'));
+
+        $onlyInvitedUsersRoomsSelect->joinLeft(
+                array(
+            'mru' => 'meeting_room_user'
+                ), 'mru.meeting_room_id = mr.meeting_room_id AND ' . $this->getDefaultAdapter()->quoteInto('mru.user_id = ?', IMDT_Util_Auth::getInstance()->get('id')), array(
+            'user_profile' => new Zend_Db_Expr('COALESCE(mru.meeting_room_profile_id,null)')
+                )
+        );
+
+        $onlyInvitedUsersRoomsSelect->joinLeft(
+                array(
+            'mrg' => 'meeting_room_group'
+                ), 'mrg.meeting_room_id = mr.meeting_room_id AND mrg.group_id in ( select group_id from proc_user_groups where user_id=' . IMDT_Util_Auth::getInstance()->get('id') . ' )', array(
+            'group_profile' => new Zend_Db_Expr('COALESCE(mrg.meeting_room_profile_id,null)')
+                )
+        );
         
-        if ($userHasGroup) {
-            $onlyInvitedUsersRoomsSelect->joinLeft(
-                    array(
-                'mru' => 'meeting_room_user'
-                    ), 'mru.meeting_room_id = mr.meeting_room_id AND ' . $this->getDefaultAdapter()->quoteInto('mru.user_id = ?', IMDT_Util_Auth::getInstance()->get('id')), array(
-                'user_profile' => new Zend_Db_Expr('COALESCE(mru.meeting_room_profile_id,null)')
-                    )
-            );
-
-            $onlyInvitedUsersRoomsSelect->joinLeft(
-                    array(
-                'mrg' => 'meeting_room_group'
-                    ), 'mrg.meeting_room_id = mr.meeting_room_id AND ' . $this->getDefaultAdapter()->quoteInto('mrg.group_id in(?)', IMDT_Util_Auth::getInstance()->get('groupIds')), array(
-                'group_profile' => new Zend_Db_Expr('COALESCE(mrg.meeting_room_profile_id,null)')
-                    )
-            );
-        } else {
-            $onlyInvitedUsersRoomsSelect->joinLeft(
-                    array(
-                'mru' => 'meeting_room_user'
-                    ), 'mru.meeting_room_id = mr.meeting_room_id AND ' . $this->getDefaultAdapter()->quoteInto('mru.user_id = ?', IMDT_Util_Auth::getInstance()->get('id')), array(
-                'user_profile' => new Zend_Db_Expr('COALESCE(mru.meeting_room_profile_id,null)'),
-                'group_profile' => new Zend_Db_Expr('NULL')
-                    )
-            );
-        }
-
+        
+        //Create a query with the union of all types of rooms
         $myRoomsSelect = $publicRoomsSelect;
-
         if (IMDT_Util_Auth::getInstance()->get('id') != null) {
             $myRoomsSelect .= ' UNION ' . $loggedUsersRoomsSelect;
             $myRoomsSelect .= ' UNION ' . $onlyInvitedUsersRoomsSelect;
@@ -185,18 +173,14 @@ class BBBManager_Model_MeetingRoom extends Zend_Db_Table_Abstract {
         $myRoomsDataSelect->joinLeft(
                 array(
             'mru' => 'meeting_room_user'
-                ), 'mru.meeting_room_id = mrd.meeting_room_id AND ' . $this->getDefaultAdapter()->quoteInto('mru.user_id = ?', IMDT_Util_Auth::getInstance()->get('id')),
-                null
+                ), 'mru.meeting_room_id = mrd.meeting_room_id AND ' . $this->getDefaultAdapter()->quoteInto('mru.user_id = ?', IMDT_Util_Auth::getInstance()->get('id')), null
         );
 
-        if ($userHasGroup) {
-            $myRoomsDataSelect->joinLeft(
-                    array(
-                'mrg' => 'meeting_room_group'
-                    ), 'mrg.meeting_room_id = mrd.meeting_room_id AND ' . $this->getDefaultAdapter()->quoteInto('mrg.group_id in (?)', IMDT_Util_Auth::getInstance()->get('groupIds')),
-                    null
-            );
-        }
+        $myRoomsDataSelect->joinLeft(
+                array(
+            'mrg' => 'meeting_room_group'
+                ), 'mrg.meeting_room_id = mrd.meeting_room_id AND mrg.group_id in ( select group_id from proc_user_groups where user_id=' . IMDT_Util_Auth::getInstance()->get('id') . ' )', null
+        );
 
         $select = $this->select()
                 ->setIntegrityCheck(false)
@@ -256,12 +240,9 @@ class BBBManager_Model_MeetingRoom extends Zend_Db_Table_Abstract {
             'mr.lock_disable_private_chat_for_locked_users',
             'mr.lock_layout_for_locked_users',
             'mr.meeting_room_category_id',
-            'mr.encrypted'
+            'mr.encrypted',
+            'mr.group_profile'
         );
-
-        if ($userHasGroup) {
-            $rGroup[] = 'mr.group_profile';
-        }
 
         $select->group($rGroup);
 
@@ -286,11 +267,7 @@ class BBBManager_Model_MeetingRoom extends Zend_Db_Table_Abstract {
             $select->where('mr.meeting_room_id = ?', $roomId);
         }
 
-        if ($userHasGroup == true) {
-            $select->where('((user_profile is not null) or (group_profile is not null))');
-        } else {
-            $select->where('(user_profile is not null)');
-        }
+        $select->where('((user_profile is not null) or (group_profile is not null))');
 
         //die($select);
 
