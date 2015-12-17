@@ -53,18 +53,18 @@ class Api_GroupsController extends Zend_Rest_Controller {
                 ->from(array('g' => 'group'), array('group_id', 'name', 'auth_mode_id', 'access_profile_id', 'observations', 'visible'))
                 ->joinLeft(array('ug' => 'user_group'), 'ug.group_id = g.group_id', array('user_attendee' => new Zend_Db_Expr('GROUP_CONCAT(distinct ug.user_id SEPARATOR ",")')))
                 //->joinLeft('user','user.user_id = user_group.user_id',array())
-                ->joinLeft('group_group', 'group_group.parent_group_id = g.group_id', array(
-                    'group_attendee_local' => new Zend_Db_Expr('GROUP_CONCAT(distinct case when g.auth_mode_id = 1 then g.group_id else null end SEPARATOR ",")'),
-                    'group_attendee_ldap' => new Zend_Db_Expr('GROUP_CONCAT(distinct case when g.auth_mode_id = 2 then g.group_id else null end SEPARATOR ",")')
+                ->joinLeft('group_group', 'group_group.parent_group_id = g.group_id', array())
+                ->joinLeft(array('g2' => 'group'), 'group_group.group_id= g2.group_id', array(
+                    'group_attendee_local' => new Zend_Db_Expr('GROUP_CONCAT(distinct case when g2.auth_mode_id = ' . BBBManager_Config_Defines::$LOCAL_AUTH_MODE . ' then g2.group_id else null end SEPARATOR ",")'),
+                    'group_attendee_ldap' => new Zend_Db_Expr('GROUP_CONCAT(distinct case when g2.auth_mode_id = ' . BBBManager_Config_Defines::$LDAP_AUTH_MODE . ' then g2.group_id else null end SEPARATOR ",")')
                 ))
-                //->where('case when g.auth_mode_id = ' . BBBManager_Config_Defines::$LDAP_AUTH_MODE . ' then visible = true else 1 = 1 end')
                 ->group(array('g.group_id', 'g.name', 'g.auth_mode_id', 'g.access_profile_id'))
                 ->order('g.name asc');
 
         if($this->_getParam('auth_mode_id', false) != BBBManager_Config_Defines::$LDAP_AUTH_MODE) {
-            $this->select->where('case when g.auth_mode_id = ' . BBBManager_Config_Defines::$LDAP_AUTH_MODE . ' then visible = true else 1 = 1 end');
+            $this->select->where('case when g.auth_mode_id = ' . BBBManager_Config_Defines::$LDAP_AUTH_MODE . ' then g.visible = true else 1 = 1 end');
         }
-
+        
         $this->acessLog();
     }
 
@@ -137,6 +137,7 @@ class Api_GroupsController extends Zend_Rest_Controller {
     public function getAction() {
         try {
             $this->select->where('g.group_id = ?', $this->_id);
+            
             $rowModel = $this->model->fetchRow($this->select);
 
             if ($rowModel == null)
@@ -332,12 +333,19 @@ class Api_GroupsController extends Zend_Rest_Controller {
                                                                                     and ug.user_id = u.user_id)');
             }
 
-            $groups_local = $data['group_attendee_local'];
-            $groups_ldap = $data['group_attendee_ldap'];
-            if (strlen(trim($groups_local)) > 0 && strlen(trim($groups_ldap)) > 0) {
-                $groups = trim($groups_local) . ',' . trim($groups_ldap);
+            $groups_local = trim($data['group_attendee_local']);
+            $groups_ldap = trim($data['group_attendee_ldap']);
+            
+            if(substr($groups_ldap, strlen($groups_ldap)-1, 1) == ',') 
+                    $groups_ldap = substr ($groups_ldap, 0, -1);
+            
+            if(substr($groups_local, strlen($groups_local)-1, 1) == ',') 
+                    $groups_local = substr ($groups_local, 0, -1);
+            
+            if (strlen($groups_local) > 0 && strlen($groups_ldap) > 0) {
+                $groups = $groups_local . ',' . $groups_ldap;
             } else {
-                $groups = trim($groups_local) . trim($groups_ldap);
+                $groups = $groups_local . $groups_ldap;
             }
 
             if (strlen(trim($groups)) == 0) {
