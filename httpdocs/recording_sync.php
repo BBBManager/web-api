@@ -59,7 +59,7 @@ try {
 
         $rawMetadataFilePath = implode(DIRECTORY_SEPARATOR, array($bbbRawRecordingPathString, $recordingId, 'events.xml'));
         if (!file_exists($rawMetadataFilePath)) {
-            echo 'Skipping recording ' . $recordingId . ' raw metadata file not found - ' . $rawMetadataFilePath;
+            //echo 'Skipping recording ' . $recordingId . ' raw metadata file not found - ' . $rawMetadataFilePath;
             continue;
         }
 
