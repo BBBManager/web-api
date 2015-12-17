@@ -143,7 +143,7 @@ try {
                     'date_start' => date('Y-m-d H:i:s', $javaToPhpStartTime),
                     'date_end' => date('Y-m-d H:i:s', $javaToPhpEndTime),
                     'name' => $meetingName,
-                    'playback_url' => IMDT_Util_Config::getInstance()->get('web_base_url') . '/playback/presentation/0.9.0/playback.html?meetingId=' . $recordingId
+                    'playback_url' => '/playback/presentation/0.9.0/playback.html?meetingId=' . $recordingId
                 );
 
                 if ($recordingReady) {
