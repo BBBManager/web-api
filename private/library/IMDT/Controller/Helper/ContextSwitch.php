@@ -235,7 +235,7 @@ class IMDT_Controller_Helper_ContextSwitch extends Zend_Controller_Action_Helper
 
                 $html = $htmlPrepend . $htmlHeaders;
 
-                if (is_array($view->response['collection']) && (count($view->response['collection']) > 0)) {
+                if (isset($view->response['collection']) && is_array($view->response['collection']) && (count($view->response['collection']) > 0)) {
                     foreach ($view->response['collection'] as $iRow => $collectionRow) {
                         if ((($iRow > 0) && (($iRow % 32) == 0))) {
                             $html .= $htmlAppend;
