@@ -10,65 +10,31 @@ class BBBManager_Util_MeetingRoom {
     }
 
     public static function getAllUsersEmail($meetingRoomId) {
-        if ($meetingRoomId == null) {
+        if ($meetingRoomId == null || !is_numeric ($meetingRoomId) ) {
             return null;
         }
-
-        $meetingRoomModel = new BBBManager_Model_MeetingRoom();
-        $memberCollection = $meetingRoomModel->findRoomMembers($meetingRoomId);
-
-        if ($memberCollection == null) {
-            return null;
-        }
-
-        $rMemberCollection = ($memberCollection != null ? $memberCollection->toArray() : array());
-
-        $rEmailCollection = array();
-
-        if (count($rMemberCollection) > 0) {
-            foreach ($rMemberCollection as $member) {
-                if ($member['user_id'] != null) {
-                    $rEmailCollection[$member['email']] = $member['email'];
-                }
-
-                if ($member['user_id_from_group'] != null) {
-                    $rEmailCollection[$member['user_email_from_group']] = $member['user_email_from_group'];
-                }
-
-                if ($member['group_auth_mode_id'] == BBBManager_Config_Defines::$LDAP_AUTH_MODE) {
-                    $groupHierarchy = BBBManager_Cache_GroupHierarchy::getInstance()->getData();
-                    $ldapGroupHierarchy = ( isset($groupHierarchy[$member['group_id']]) ? $groupHierarchy[$member['group_id']]['parents'] : array());
-                    $ldapConfig = IMDT_Util_Ldap::getInstance()->getSettings();
-
-                    if (count($ldapGroupHierarchy) > 0) {
-                        foreach ($ldapGroupHierarchy as $parent) {
-
-                            if ($parent['auth_mode_id'] != BBBManager_Config_Defines::$LDAP_AUTH_MODE) {
-                                continue;
-                            }
-
-                            $usersFromLdapGroup = IMDT_Util_Ldap::getInstance()->fetchUsersFromGroup($parent['name']);
-
-                            foreach ($usersFromLdapGroup as $groupMember) {
-                                $memberEmail = $groupMember . $ldapConfig['ldap']['account_domain_name_short'];
-                                $rEmailCollection[$memberEmail] = $memberEmail;
-                            }
-                        }
-                    } else {
-                        $usersFromLdapGroup = IMDT_Util_Ldap::getInstance()->fetchUsersFromGroup($member['group_name']);
-
-                        foreach ($usersFromLdapGroup as $groupMember) {
-                            $memberEmail = $groupMember . $ldapConfig['ldap']['account_domain_name_short'];
-                            $rEmailCollection[$memberEmail] = $memberEmail;
-                        }
-                    }
-                }
-            }
-        }
-
-        $distinctEmailCollection = array_keys($rEmailCollection);
-
-        file_put_contents(APPLICATION_PATH . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'tmp' . DIRECTORY_SEPARATOR . 'log.log', http_build_query($distinctEmailCollection));
+        
+        $userModel = new BBBManager_Model_User();
+        
+        $sql = 'select distinct email from meeting_room mr
+                inner join meeting_room_user mru on mr.meeting_room_id = mru.meeting_room_id
+                inner join user u on mru.user_id = u.user_id
+                where
+                mr.meeting_room_id = ' . $meetingRoomId . ' and 
+                ' . $userModel->getSqlStatementForActiveUsers();
+        
+        $sql .= ' union ';
+        
+        $sql .= 'SELECT distinct email FROM meeting_room mr 
+                INNER JOIN meeting_room_group mrg ON mr.meeting_room_id = mrg.meeting_room_id
+                inner join proc_user_groups pug on pug.group_id = mrg.group_id
+                INNER JOIN user u ON pug.user_id = u.user_id
+                where
+                mr.meeting_room_id = ' . $meetingRoomId . ' and 
+                ' . $userModel->getSqlStatementForActiveUsers();
+        
+        $distinctEmailCollection = $userModel->getDefaultAdapter()->fetchAll($sql);
+        
         return $distinctEmailCollection;
     }
 
