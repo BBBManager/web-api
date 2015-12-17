@@ -111,7 +111,7 @@ class Api_RoomInvitesController extends Zend_Rest_Controller {
 
         try {
             $data = $this->_helper->params();
-            if (empty($data))
+            if (empty($data) || !isset($data['meeting_room_id']) || !is_numeric($data['meeting_room_id']))
                 throw new Exception($this->_helper->translate('Invalid Request.'));
 
             $arrErrorMessages = $this->parseValidators($data);
@@ -150,7 +150,8 @@ class Api_RoomInvitesController extends Zend_Rest_Controller {
             $collectionUsersPresenter = $this->model->getDefaultAdapter()->fetchAll('select u.user_id, u.name
                                                         from meeting_room_user
                                                         join `user` u on u.user_id = meeting_room_user.user_id
-                                                        where meeting_room_user.meeting_room_profile_id = 3');
+                                                        where meeting_room_user.meeting_room_profile_id = 3
+                                                        and meeting_room_user.meeting_room_id = ' . $meetingRoomId );
             if (count($collectionUsersPresenter) > 0) {
                 foreach ($collectionUsersPresenter as $curr) {
                     $presenters[] = $curr['name'];
