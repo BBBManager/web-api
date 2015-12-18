@@ -320,8 +320,7 @@ class Api_UsersController extends Zend_Rest_Controller {
             }
 
             $userInfo = array('groups' => (isset($data['groups']) ? $data['groups'] : array()));
-            IMDT_Util_AccessProfile::generate($userInfo);
-            $rowModel->access_profile_id = $userInfo['user_access_profile'];
+            $rowModel->access_profile_id = null;
 
             $this->doConversions($rowModel);
             $newRowId = $rowModel->save();
@@ -333,8 +332,6 @@ class Api_UsersController extends Zend_Rest_Controller {
                 $this->model->getAdapter()->query('insert into user_group(user_id,group_id) 
                                                         select ' . $this->_id . ', g.group_id 
                                                         from `group` g where g.group_id in (' . $groups . ')');
-
-                //BBBManager_Util_AccessProfileChanges::getInstance()->mustChange();
             }
 
             BBBManager_Util_AccessProfileChanges::getInstance()->mustChange();
@@ -424,8 +421,7 @@ class Api_UsersController extends Zend_Rest_Controller {
             }
 
             $userInfo = array('groups' => (isset($data['groups']) ? $data['groups'] : array()));
-            IMDT_Util_AccessProfile::generate($userInfo);
-            $rowModel->access_profile_id = $userInfo['user_access_profile'];
+            $rowModel->access_profile_id = null;
 
             $this->doConversions($rowModel);
 
@@ -464,12 +460,10 @@ class Api_UsersController extends Zend_Rest_Controller {
                 if (((strlen(trim($groups)) > 0) || ((strlen(trim($groups)) == 0) && count($rCurrentGroups) > 0))) {
                     $mustValidaProfileChanges = (count(array_diff(explode(',', $groups), $rCurrentGroups)) > 0);
                     $mustValidaProfileChanges = $mustValidaProfileChanges || (count(array_diff($rCurrentGroups, explode(',', $groups))) > 0);
-
-                    if ($mustValidaProfileChanges > 0) {
-                        BBBManager_Util_AccessProfileChanges::getInstance()->mustChange();
-                    }
                 }
             }
+            
+            BBBManager_Util_AccessProfileChanges::getInstance()->mustChange();
 
             $this->model->getAdapter()->commit();
             $this->view->response = array('success' => '1', 'msg' => $this->_helper->translate('User has been successfully changed.'));
