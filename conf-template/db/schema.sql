@@ -506,9 +506,11 @@ CREATE TABLE `group_group` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 alter table `group` add column internal_name varchar(500);
-alter table `group` modify access_profile_id int null;
 alter table `user` modify access_profile_id int null;
 alter table `group` add constraint group_fk_access_profile foreign key (access_profile_id) references access_profile(access_profile_id);
+alter table `group` change access_profile_id access_profile_id  integer not null;
+alter table `group` alter column access_profile_id set default 5 ;
+
 
 create table proc_group_recursive
 (
@@ -516,9 +518,6 @@ create table proc_group_recursive
     ancestry_group_id integer not null,
     primary key (group_id, ancestry_group_id)
 );
-
-alter table `group` alter column access_profile_id set default 5 ;
-alter table `group` change access_profile_id access_profile_id  integer not null;
 
 DELIMITER $$
 CREATE PROCEDURE `update_security`()
