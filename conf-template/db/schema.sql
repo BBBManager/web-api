@@ -508,6 +508,7 @@ CREATE TABLE `group_group` (
 alter table `group` add column internal_name varchar(500);
 alter table `group` modify access_profile_id int null;
 alter table `user` modify access_profile_id int null;
+alter table `group` add constraint group_fk_access_profile foreign key (access_profile_id) references access_profile(access_profile_id);
 
 create table proc_group_recursive
 (
