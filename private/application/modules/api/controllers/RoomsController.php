@@ -12,6 +12,8 @@ class Api_RoomsController extends Zend_Rest_Controller {
         $this->_id = $this->_getParam('id', null);
 
         $this->model = new BBBManager_Model_MeetingRoom();
+        
+        $this->model->getAdapter()->query('SET SESSION group_concat_max_len = 10485760');
 
         $this->select = $this->model->select()
                 ->setIntegrityCheck(false)
