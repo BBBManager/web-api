@@ -69,6 +69,10 @@ class BBBManager_Model_MeetingRoom extends Zend_Db_Table_Abstract {
     }
 
     public function findMyRooms($roomId = null, $criteria = null) {
+        $userId = IMDT_Util_Auth::getInstance()->get('id');
+        if($userId == null || $userId == '') {
+            $userId = '0';
+        }
         //Public Rooms
         $publicRoomsSelect = $this->select();
         $publicRoomsSelect->from(
@@ -97,7 +101,7 @@ class BBBManager_Model_MeetingRoom extends Zend_Db_Table_Abstract {
         $onlyInvitedUsersRoomsSelect->joinLeft(
                 array(
             'mru' => 'meeting_room_user'
-                ), 'mru.meeting_room_id = mr.meeting_room_id AND ' . $this->getDefaultAdapter()->quoteInto('mru.user_id = ?', IMDT_Util_Auth::getInstance()->get('id')), array(
+                ), 'mru.meeting_room_id = mr.meeting_room_id AND ' . $this->getDefaultAdapter()->quoteInto('mru.user_id = ?', $userId), array(
             'user_profile' => new Zend_Db_Expr('COALESCE(mru.meeting_room_profile_id,null)')
                 )
         );
@@ -105,7 +109,7 @@ class BBBManager_Model_MeetingRoom extends Zend_Db_Table_Abstract {
         $onlyInvitedUsersRoomsSelect->joinLeft(
                 array(
             'mrg' => 'meeting_room_group'
-                ), 'mrg.meeting_room_id = mr.meeting_room_id AND mrg.group_id in ( select group_id from proc_user_groups where user_id=' . IMDT_Util_Auth::getInstance()->get('id') . ' )', array(
+                ), 'mrg.meeting_room_id = mr.meeting_room_id AND mrg.group_id in ( select group_id from proc_user_groups where user_id=' . $userId . ' )', array(
             'group_profile' => new Zend_Db_Expr('COALESCE(mrg.meeting_room_profile_id,null)')
                 )
         );
@@ -173,13 +177,13 @@ class BBBManager_Model_MeetingRoom extends Zend_Db_Table_Abstract {
         $myRoomsDataSelect->joinLeft(
                 array(
             'mru' => 'meeting_room_user'
-                ), 'mru.meeting_room_id = mrd.meeting_room_id AND ' . $this->getDefaultAdapter()->quoteInto('mru.user_id = ?', IMDT_Util_Auth::getInstance()->get('id')), null
+                ), 'mru.meeting_room_id = mrd.meeting_room_id AND ' . $this->getDefaultAdapter()->quoteInto('mru.user_id = ?', $userId), null
         );
 
         $myRoomsDataSelect->joinLeft(
                 array(
             'mrg' => 'meeting_room_group'
-                ), 'mrg.meeting_room_id = mrd.meeting_room_id AND mrg.group_id in ( select group_id from proc_user_groups where user_id=' . IMDT_Util_Auth::getInstance()->get('id') . ' )', null
+                ), 'mrg.meeting_room_id = mrd.meeting_room_id AND mrg.group_id in ( select group_id from proc_user_groups where user_id=' . $userId . ' )', null
         );
 
         $select = $this->select()
@@ -269,8 +273,7 @@ class BBBManager_Model_MeetingRoom extends Zend_Db_Table_Abstract {
 
         $select->where('((user_profile is not null) or (group_profile is not null))');
 
-        //die($select);
-
+//        die($select);
         return $this->fetchAll($select);
     }
 
