@@ -70,6 +70,9 @@ class BBBManager_Model_MeetingRoom extends Zend_Db_Table_Abstract {
 
     public function findMyRooms($roomId = null, $criteria = null) {
         $userId = IMDT_Util_Auth::getInstance()->get('id');
+        $userAuthData = IMDT_Util_Auth::getInstance()->getData();
+        $userAuthMode = $userAuthData['auth_mode'];
+        
         if($userId == null || $userId == '') {
             $userId = '0';
         }
@@ -117,7 +120,7 @@ class BBBManager_Model_MeetingRoom extends Zend_Db_Table_Abstract {
         
         //Create a query with the union of all types of rooms
         $myRoomsSelect = $publicRoomsSelect;
-        if (IMDT_Util_Auth::getInstance()->get('id') != null) {
+        if ($userId != '0' && $userAuthMode != '3') {
             $myRoomsSelect .= ' UNION ' . $loggedUsersRoomsSelect;
             $myRoomsSelect .= ' UNION ' . $onlyInvitedUsersRoomsSelect;
         }
