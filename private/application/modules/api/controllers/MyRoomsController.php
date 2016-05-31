@@ -239,6 +239,7 @@ class Api_MyRoomsController extends Zend_Rest_Controller {
                 $this->view->response['meetingRoomStatus'] = BBBManager_Config_Defines::$ROOM_OPENED;
             }
         } catch (Exception $e) {
+            die($e->getMessage());
             $this->view->response = array('success' => '0', 'msg' => $e->getMessage());
         }
     }
