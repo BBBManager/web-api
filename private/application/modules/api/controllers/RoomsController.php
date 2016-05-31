@@ -406,6 +406,7 @@ class Api_RoomsController extends Zend_Rest_Controller {
 
             $this->view->response = array('success' => '1', 'collection' => $rCollection, 'msg' => sprintf($this->_helper->translate('%s meeting rooms retrieved successfully.'), count($rCollection)));
         } catch (Exception $e) {
+            die($e->getMessage());
             $this->view->response = array('success' => '0', 'msg' => $e->getMessage());
         }
     }
