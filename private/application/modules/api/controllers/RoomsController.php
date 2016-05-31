@@ -404,9 +404,14 @@ class Api_RoomsController extends Zend_Rest_Controller {
 
             array_walk($rCollection, array($this, 'rowHandler'));
 
+            if(json_encode($rCollection) === FALSE) {
+                $this->view->response = array('success' => '0', 'msg' => 'Error encoding JSON: ' . json_last_error_msg());
+                return;
+            }
+            
             $this->view->response = array('success' => '1', 'collection' => $rCollection, 'msg' => sprintf($this->_helper->translate('%s meeting rooms retrieved successfully.'), count($rCollection)));
+            
         } catch (Exception $e) {
-            die($e->getMessage());
             $this->view->response = array('success' => '0', 'msg' => $e->getMessage());
         }
     }
